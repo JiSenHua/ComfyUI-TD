@@ -77,7 +77,7 @@ git clone https://github.com/JiSenHua/ComfyUI-TD.git
 
 - 基于[ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main) **Send Image (WebSocket)** 节点二次开发。
 - 本节点支持将ComfyUI生成的图片返回至 **TD** 进行解析，从而生成对应的TOP组件。
-- `broadcast`广播参数（默认关闭）：启用该参数后，生成的点云数据将广播至所有已建立 WebSocket 连接的客户端。
+- `broadcast`广播参数（默认关闭）：启用该参数后，生成的图片数据将广播至所有已建立 WebSocket 连接的客户端。
 - **ComfyUI2TD.tox**组件至 **v_5.1.x** 版本起，预置的工作流将使用ComfyUI-TD节点，不再使用于[ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main)。
 
 ### LoadTDImage
