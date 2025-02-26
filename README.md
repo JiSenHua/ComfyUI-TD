@@ -11,7 +11,7 @@
 - **ComfyUI-TD** 需与 **ComfyUI2TD.tox** 组件配合使用（插件已上传至`tox`文件夹）。  
 - 请确保**ComfyUI2TD.tox** 组件版本更新至 **v_5.1.x** 或更高版本。此版本对组件代码进行了全面重构，支持了视频与3D模型(点云)的数据传输。另重写了WebSocket接口，有效解决了在网络条件较差时，使用云端ComfyUI可能出现的数据（图像）无法正常返回的问题。   
 - **ComfyUI2TD.tox** 组件至 **v_5.1.x** 版本起，预置的工作流将使用ComfyUI-TD节点，不再使用于[ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main)。
-- 旧版 **ComfyUI2TD.tox** 组件基于[TDComfyUI](https://github.com/Acly/comfyui-tooling-nodes/tree/main](https://github.com/olegchomp/TDComfyUI))项目开发，感谢olegchomp！
+- 旧版 **ComfyUI2TD.tox** 组件基于[TDComfyUI](https://github.com/olegchomp/TDComfyUI)项目开发，感谢olegchomp！
 - 若需使用云端ComfyUI，可选择[仙宫云](https://github.com/Acly/comfyui-tooling-nodes/tree/main)服务器，配套镜像已准备完毕。
   
 ---
