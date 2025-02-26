@@ -297,6 +297,7 @@ class Comfy3DPacktoTD:
         try:
             vertices = mesh.v.cpu().numpy().astype(np.float32)
             colors = None
+            color_source = "none"
 
             if hasattr(mesh, 'albedo') and mesh.albedo is not None:
                 albedo = mesh.albedo
@@ -310,27 +311,61 @@ class Comfy3DPacktoTD:
                         uvs = mesh.vt.cpu().numpy()
                         uvs = np.clip(uvs, 0, 1)
                         tex_h, tex_w = albedo.shape[:2]
-                        tex_x = (uvs[:, 0] * (tex_w - 1)).astype(np.int32)
-                        tex_y = ((1 - uvs[:, 1]) * (tex_h - 1)).astype(np.int32)
-                        colors = albedo[tex_y, tex_x]
+                        
+                        # 使用不翻转V的映射方法
+                        mapped_u, mapped_v = uvs[:, 0], uvs[:, 1]
+                        
+                        # 使用双线性插值
+                        tex_x = mapped_u * (tex_w - 1)
+                        tex_y = mapped_v * (tex_h - 1)
+                        
+                        # 获取整数部分和小数部分
+                        tex_x0 = np.floor(tex_x).astype(np.int32)
+                        tex_y0 = np.floor(tex_y).astype(np.int32)
+                        tex_x1 = np.minimum(tex_x0 + 1, tex_w - 1)
+                        tex_y1 = np.minimum(tex_y0 + 1, tex_h - 1)
+                        
+                        # 计算权重
+                        wx = tex_x - tex_x0
+                        wy = tex_y - tex_y0
+                        
+                        # 双线性插值
+                        c00 = albedo[tex_y0, tex_x0]
+                        c01 = albedo[tex_y0, tex_x1]
+                        c10 = albedo[tex_y1, tex_x0]
+                        c11 = albedo[tex_y1, tex_x1]
+                        
+                        c0 = c00 * (1 - wx[:, np.newaxis]) + c01 * wx[:, np.newaxis]
+                        c1 = c10 * (1 - wx[:, np.newaxis]) + c11 * wx[:, np.newaxis]
+                        colors = c0 * (1 - wy[:, np.newaxis]) + c1 * wy[:, np.newaxis]
+                        
+                        color_source = "albedo_with_uv_no_v_flip"
+                    else:
+                        if albedo.shape[0] == len(vertices):
+                            colors = albedo
+                            color_source = "albedo_direct"
                 else:
                     colors = albedo
+                    color_source = "albedo_scalar"
 
             if colors is None and hasattr(mesh, 'vc') and mesh.vc is not None:
                 colors = mesh.vc.cpu().numpy()
+                color_source = "vertex_colors"
 
             if colors is None:
                 positions = vertices - vertices.min(axis=0)
                 positions = positions / positions.max(axis=0) if positions.max() > 0 else positions
-                colors = (positions * 255).astype(np.uint8)
-                alpha = np.full((len(vertices), 1), 255, dtype=np.uint8)
-                colors = np.concatenate([colors, alpha], axis=1)
+                colors = positions
+                color_source = "generated"
 
-            if colors.max() <= 1.0:
-                colors = (colors * 255).astype(np.uint8)
-            else:
-                colors = np.clip(colors, 0, 255).astype(np.uint8)
+            # 确保颜色值在合理范围内
+            if colors is not None:
+                if colors.max() <= 1.0:
+                    colors = (colors * 255).astype(np.uint8)
+                else:
+                    colors = np.clip(colors, 0, 255).astype(np.uint8)
 
+            # 确保有Alpha通道
             if colors.shape[1] == 3:
                 alpha = np.full((len(vertices), 1), 255, dtype=np.uint8)
                 colors = np.concatenate([colors, alpha], axis=1)
@@ -381,8 +416,10 @@ class Comfy3DPacktoTD:
 
         except Exception as e:
             print(f"[Error] send_to_td: {str(e)}")
+            import traceback
+            traceback.print_exc()
             raise ValueError(f"Error sending mesh: {str(e)}")
-            
+                
 class LoadTDImage:
     #This node originates from the comfyui-tooling-nodes and utilizes the "Load Image (Base64)" functionality.
     #https://github.com/Acly/comfyui-tooling-nodes
@@ -395,17 +432,31 @@ class LoadTDImage:
     FUNCTION = "load_image"
 
     def load_image(self, image):
-        imgdata = base64.b64decode(image)
-        img = Image.open(BytesIO(imgdata))
-
-        if "A" in img.getbands():
-            mask = np.array(img.getchannel("A")).astype(np.float32) / 255.0
-            mask = 1.0 - torch.from_numpy(mask)
-        else:
-            mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
-
-        img = img.convert("RGB")
-        img = np.array(img).astype(np.float32) / 255.0
-        img = torch.from_numpy(img)[None,]
-
-        return (img, mask)
+        try:
+            imgdata = base64.b64decode(image)
+            img = Image.open(BytesIO(imgdata))
+            
+            width, height = img.size
+            
+            if "A" in img.getbands():
+                mask = np.array(img.getchannel("A")).astype(np.float32) / 255.0
+                mask = 1.0 - torch.from_numpy(mask)
+            else:
+                mask = torch.zeros((height, width), dtype=torch.float32, device="cpu")
+            
+            if len(mask.shape) == 2:
+                mask = mask.unsqueeze(0)
+            
+            img = img.convert("RGB")
+            img = np.array(img).astype(np.float32) / 255.0
+            img = torch.from_numpy(img)[None,]
+            
+            print(f"Image shape: {img.shape}, Mask shape: {mask.shape}")
+            
+            return (img, mask)
+            
+        except Exception as e:
+            print(f"Error in LoadTDImage: {str(e)}")
+            default_img = torch.zeros((1, 3, 64, 64), dtype=torch.float32, device="cpu")
+            default_mask = torch.zeros((1, 64, 64), dtype=torch.float32, device="cpu")
+            return (default_img, default_mask)
