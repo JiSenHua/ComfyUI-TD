@@ -312,24 +312,19 @@ class Comfy3DPacktoTD:
                         uvs = np.clip(uvs, 0, 1)
                         tex_h, tex_w = albedo.shape[:2]
                         
-                        # 使用不翻转V的映射方法
                         mapped_u, mapped_v = uvs[:, 0], uvs[:, 1]
                         
-                        # 使用双线性插值
                         tex_x = mapped_u * (tex_w - 1)
                         tex_y = mapped_v * (tex_h - 1)
                         
-                        # 获取整数部分和小数部分
                         tex_x0 = np.floor(tex_x).astype(np.int32)
                         tex_y0 = np.floor(tex_y).astype(np.int32)
                         tex_x1 = np.minimum(tex_x0 + 1, tex_w - 1)
                         tex_y1 = np.minimum(tex_y0 + 1, tex_h - 1)
                         
-                        # 计算权重
                         wx = tex_x - tex_x0
                         wy = tex_y - tex_y0
                         
-                        # 双线性插值
                         c00 = albedo[tex_y0, tex_x0]
                         c01 = albedo[tex_y0, tex_x1]
                         c10 = albedo[tex_y1, tex_x0]
@@ -357,15 +352,13 @@ class Comfy3DPacktoTD:
                 positions = positions / positions.max(axis=0) if positions.max() > 0 else positions
                 colors = positions
                 color_source = "generated"
-
-            # 确保颜色值在合理范围内
+                
             if colors is not None:
                 if colors.max() <= 1.0:
                     colors = (colors * 255).astype(np.uint8)
                 else:
                     colors = np.clip(colors, 0, 255).astype(np.uint8)
 
-            # 确保有Alpha通道
             if colors.shape[1] == 3:
                 alpha = np.full((len(vertices), 1), 255, dtype=np.uint8)
                 colors = np.concatenate([colors, alpha], axis=1)
