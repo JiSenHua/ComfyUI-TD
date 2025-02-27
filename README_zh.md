@@ -8,7 +8,7 @@
 |:---:|:---:|:---:|
 | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/image.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Video.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/PointCloud.gif) |
 
-# [🇺🇸 English README](../README.md)
+# [🇺🇸 English README](README.md)
 
 ## 用户须知
 - **ComfyUI-TD** 的部分节点基于[ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main)进行了移植和优化。
