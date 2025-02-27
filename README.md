@@ -6,7 +6,7 @@
 
 | | | |
 |:---:|:---:|:---:|
-| ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/PointCloud.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/image.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Video.gif) |
+| ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/image.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Video.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/PointCloud.gif) |
 
 
 ## 用户须知
