@@ -8,6 +8,8 @@ from PIL import Image
 import base64
 from io import BytesIO
 import torch
+import tempfile
+import os
 
 class Hy3DtoTD:
     @classmethod
@@ -453,3 +455,102 @@ class LoadTDImage:
             default_img = torch.zeros((1, 3, 64, 64), dtype=torch.float32, device="cpu")
             default_mask = torch.zeros((1, 64, 64), dtype=torch.float32, device="cpu")
             return (default_img, default_mask)
+
+class VideotoTD:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "frame_rate": ("FLOAT", {"default": 8, "min": 1, "step": 1}),
+                "quality": ("INT", {"default": 75, "min": 15, "max": 100, "step": 1}),
+                "broadcast": ("BOOLEAN", {"default": False}),
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "process_video"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
+
+    def process_video(self, images, frame_rate, broadcast, quality):
+        if images is None or (isinstance(images, torch.Tensor) and images.size(0) == 0):
+            raise ValueError("No valid images provided")
+
+        video_binary = self._encode_video_ffmpeg(images, frame_rate, quality)
+        
+        return self._send_to_td(video_binary, broadcast)
+    
+    def _encode_video_ffmpeg(self, images, frame_rate, quality):
+        try:
+            import imageio_ffmpeg
+
+            with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as temp_file:
+                temp_path = temp_file.name
+            
+            if isinstance(images, torch.Tensor):
+                if len(images.shape) != 4:
+                    raise ValueError(f"Expected 4D tensor, got shape {images.shape}")
+                
+                images_np = images.cpu().numpy()
+                if images_np.max() <= 1.0:
+                    images_np = (images_np * 255).astype(np.uint8)
+                else:
+                    images_np = images_np.astype(np.uint8)
+            else:
+                raise TypeError("Images must be a torch.Tensor")
+            
+            height, width = images_np[0].shape[:2]
+            
+            output_params = [
+                '-c:v', 'libx264',  
+                '-preset', 'medium', 
+                '-crf', str(51 - quality//2),  
+                '-pix_fmt', 'yuv420p'  
+            ]
+            
+            writer = imageio_ffmpeg.write_frames(
+                temp_path,
+                (width, height),
+                fps=frame_rate,
+                output_params=output_params
+            )
+            
+            writer.send(None)
+
+            for img in images_np:
+                if img.shape[2] == 4:  # RGBA
+                    img = img[:, :, :3]
+                
+                if not img.flags['C_CONTIGUOUS']:
+                    img = np.ascontiguousarray(img)
+                
+                writer.send(img)
+            
+            writer.close()
+            
+            with open(temp_path, 'rb') as f:
+                video_binary = f.read()
+            
+            os.unlink(temp_path)
+            
+            return video_binary
+            
+        except Exception as e:
+            raise RuntimeError(f"Error encoding video with ffmpeg: {str(e)}")
+    
+    def _send_to_td(self, video_binary, broadcast):
+        try:
+            server = PromptServer.instance
+            sid = None if broadcast else server.client_id
+            server.send_sync(1001, video_binary, sid=sid)
+            
+            return {"ui": {
+                "video": [{
+                    "source": "websocket",
+                    "content-type": "video/mp4",
+                    "type": "output",
+                }]
+            }}
+        except Exception as e:
+            raise ValueError(f"Error sending video: {str(e)}")
