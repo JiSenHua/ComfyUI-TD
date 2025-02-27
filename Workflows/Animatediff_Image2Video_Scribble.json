@@ -1,0 +1,312 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 945442756343725,
+      "steps": 8,
+      "cfg": 2,
+      "sampler_name": "lcm",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "39",
+        0
+      ],
+      "positive": [
+        "48",
+        0
+      ],
+      "negative": [
+        "48",
+        1
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "SD1.5_photon_v1.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "加载检查点"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 32
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空潜空间图像"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "jellyfish in the sea,ink,8k",
+      "clip": [
+        "62",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 正向提示词"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "low quality",
+      "clip": [
+        "62",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 负向提示词"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "37": {
+    "inputs": {
+      "lora_name": "AnimateLCM_sd15_t2v_lora.safetensors",
+      "strength_model": 0.8,
+      "model": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "仅加载LoRA模型"
+    }
+  },
+  "38": {
+    "inputs": {
+      "sampling": "lcm",
+      "zsnr": false,
+      "model": [
+        "62",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingDiscrete",
+    "_meta": {
+      "title": "模型采样离散"
+    }
+  },
+  "39": {
+    "inputs": {
+      "beta_schedule": "lcm avg(sqrt_linear,linear)",
+      "model": [
+        "38",
+        0
+      ],
+      "m_models": [
+        "40",
+        0
+      ],
+      "context_options": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "ADE_UseEvolvedSampling",
+    "_meta": {
+      "title": "Use Evolved Sampling 🎭🅐🅓②"
+    }
+  },
+  "40": {
+    "inputs": {
+      "start_percent": 0,
+      "end_percent": 1,
+      "motion_model": [
+        "41",
+        0
+      ]
+    },
+    "class_type": "ADE_ApplyAnimateDiffModel",
+    "_meta": {
+      "title": "Apply AnimateDiff Model (Adv.) 🎭🅐🅓②"
+    }
+  },
+  "41": {
+    "inputs": {
+      "model_name": "AnimateLCM_sd15_t2v.ckpt"
+    },
+    "class_type": "ADE_LoadAnimateDiffModel",
+    "_meta": {
+      "title": "Load AnimateDiff Model 🎭🅐🅓②"
+    }
+  },
+  "48": {
+    "inputs": {
+      "strength": 0.9,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "control_net": [
+        "49",
+        0
+      ],
+      "image": [
+        "54",
+        0
+      ],
+      "vae": [
+        "63",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "应用控制网"
+    }
+  },
+  "49": {
+    "inputs": {
+      "sparsectrl_name": "v3_sd15_sparsectrl_scribble.ckpt",
+      "use_motion": true,
+      "motion_strength": 1,
+      "motion_scale": 1,
+      "context_aware": "nearest_hint",
+      "sparse_hint_mult": 1,
+      "sparse_nonhint_mult": 1,
+      "sparse_mask_mult": 1,
+      "sparse_method": [
+        "50",
+        0
+      ]
+    },
+    "class_type": "ACN_SparseCtrlLoaderAdvanced",
+    "_meta": {
+      "title": "Load SparseCtrl Model 🛂🅐🅒🅝"
+    }
+  },
+  "50": {
+    "inputs": {
+      "spread": "uniform"
+    },
+    "class_type": "ACN_SparseCtrlSpreadMethodNode",
+    "_meta": {
+      "title": "SparseCtrl Spread Method 🛂🅐🅒🅝"
+    }
+  },
+  "54": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "upscale_method": "nearest-exact",
+      "keep_proportion": false,
+      "divisible_by": 2,
+      "crop": "disabled",
+      "image": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  },
+  "59": {
+    "inputs": {
+      "context_length": 16,
+      "context_stride": 1,
+      "context_overlap": 4,
+      "closed_loop": false,
+      "fuse_method": "pyramid",
+      "use_on_equal_length": false,
+      "start_percent": 0,
+      "guarantee_steps": 1
+    },
+    "class_type": "ADE_LoopedUniformContextOptions",
+    "_meta": {
+      "title": "Context Options◆Looped Uniform 🎭🅐🅓"
+    }
+  },
+  "62": {
+    "inputs": {
+      "lora_name": "SD1.5_(水墨山水)Ink scenery.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "37",
+        0
+      ],
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  },
+  "63": {
+    "inputs": {
+      "vae_name": "vaeFtMse840000EmaPruned_vaeFtMse840k.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "加载VAE"
+    }
+  },
+  "65": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "Scribble 线框图"
+    }
+  },
+  "66": {
+    "inputs": {
+      "frame_rate": 8,
+      "quality": 75,
+      "broadcast": false,
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "VideotoTD",
+    "_meta": {
+      "title": "VideotoTD"
+    }
+  }
+}

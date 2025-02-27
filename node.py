@@ -8,6 +8,8 @@ from PIL import Image
 import base64
 from io import BytesIO
 import torch
+import tempfile
+import os
 
 class Hy3DtoTD:
     @classmethod
@@ -297,6 +299,7 @@ class Comfy3DPacktoTD:
         try:
             vertices = mesh.v.cpu().numpy().astype(np.float32)
             colors = None
+            color_source = "none"
 
             if hasattr(mesh, 'albedo') and mesh.albedo is not None:
                 albedo = mesh.albedo
@@ -310,26 +313,53 @@ class Comfy3DPacktoTD:
                         uvs = mesh.vt.cpu().numpy()
                         uvs = np.clip(uvs, 0, 1)
                         tex_h, tex_w = albedo.shape[:2]
-                        tex_x = (uvs[:, 0] * (tex_w - 1)).astype(np.int32)
-                        tex_y = ((1 - uvs[:, 1]) * (tex_h - 1)).astype(np.int32)
-                        colors = albedo[tex_y, tex_x]
+                        
+                        mapped_u, mapped_v = uvs[:, 0], uvs[:, 1]
+                        
+                        tex_x = mapped_u * (tex_w - 1)
+                        tex_y = mapped_v * (tex_h - 1)
+                        
+                        tex_x0 = np.floor(tex_x).astype(np.int32)
+                        tex_y0 = np.floor(tex_y).astype(np.int32)
+                        tex_x1 = np.minimum(tex_x0 + 1, tex_w - 1)
+                        tex_y1 = np.minimum(tex_y0 + 1, tex_h - 1)
+                        
+                        wx = tex_x - tex_x0
+                        wy = tex_y - tex_y0
+                        
+                        c00 = albedo[tex_y0, tex_x0]
+                        c01 = albedo[tex_y0, tex_x1]
+                        c10 = albedo[tex_y1, tex_x0]
+                        c11 = albedo[tex_y1, tex_x1]
+                        
+                        c0 = c00 * (1 - wx[:, np.newaxis]) + c01 * wx[:, np.newaxis]
+                        c1 = c10 * (1 - wx[:, np.newaxis]) + c11 * wx[:, np.newaxis]
+                        colors = c0 * (1 - wy[:, np.newaxis]) + c1 * wy[:, np.newaxis]
+                        
+                        color_source = "albedo_with_uv_no_v_flip"
+                    else:
+                        if albedo.shape[0] == len(vertices):
+                            colors = albedo
+                            color_source = "albedo_direct"
                 else:
                     colors = albedo
+                    color_source = "albedo_scalar"
 
             if colors is None and hasattr(mesh, 'vc') and mesh.vc is not None:
                 colors = mesh.vc.cpu().numpy()
+                color_source = "vertex_colors"
 
             if colors is None:
                 positions = vertices - vertices.min(axis=0)
                 positions = positions / positions.max(axis=0) if positions.max() > 0 else positions
-                colors = (positions * 255).astype(np.uint8)
-                alpha = np.full((len(vertices), 1), 255, dtype=np.uint8)
-                colors = np.concatenate([colors, alpha], axis=1)
-
-            if colors.max() <= 1.0:
-                colors = (colors * 255).astype(np.uint8)
-            else:
-                colors = np.clip(colors, 0, 255).astype(np.uint8)
+                colors = positions
+                color_source = "generated"
+                
+            if colors is not None:
+                if colors.max() <= 1.0:
+                    colors = (colors * 255).astype(np.uint8)
+                else:
+                    colors = np.clip(colors, 0, 255).astype(np.uint8)
 
             if colors.shape[1] == 3:
                 alpha = np.full((len(vertices), 1), 255, dtype=np.uint8)
@@ -381,8 +411,10 @@ class Comfy3DPacktoTD:
 
         except Exception as e:
             print(f"[Error] send_to_td: {str(e)}")
+            import traceback
+            traceback.print_exc()
             raise ValueError(f"Error sending mesh: {str(e)}")
-            
+                
 class LoadTDImage:
     #This node originates from the comfyui-tooling-nodes and utilizes the "Load Image (Base64)" functionality.
     #https://github.com/Acly/comfyui-tooling-nodes
@@ -395,17 +427,130 @@ class LoadTDImage:
     FUNCTION = "load_image"
 
     def load_image(self, image):
-        imgdata = base64.b64decode(image)
-        img = Image.open(BytesIO(imgdata))
+        try:
+            imgdata = base64.b64decode(image)
+            img = Image.open(BytesIO(imgdata))
+            
+            width, height = img.size
+            
+            if "A" in img.getbands():
+                mask = np.array(img.getchannel("A")).astype(np.float32) / 255.0
+                mask = 1.0 - torch.from_numpy(mask)
+            else:
+                mask = torch.zeros((height, width), dtype=torch.float32, device="cpu")
+            
+            if len(mask.shape) == 2:
+                mask = mask.unsqueeze(0)
+            
+            img = img.convert("RGB")
+            img = np.array(img).astype(np.float32) / 255.0
+            img = torch.from_numpy(img)[None,]
+            
+            print(f"Image shape: {img.shape}, Mask shape: {mask.shape}")
+            
+            return (img, mask)
+            
+        except Exception as e:
+            print(f"Error in LoadTDImage: {str(e)}")
+            default_img = torch.zeros((1, 3, 64, 64), dtype=torch.float32, device="cpu")
+            default_mask = torch.zeros((1, 64, 64), dtype=torch.float32, device="cpu")
+            return (default_img, default_mask)
 
-        if "A" in img.getbands():
-            mask = np.array(img.getchannel("A")).astype(np.float32) / 255.0
-            mask = 1.0 - torch.from_numpy(mask)
-        else:
-            mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+class VideotoTD:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "frame_rate": ("FLOAT", {"default": 8, "min": 1, "step": 1}),
+                "quality": ("INT", {"default": 75, "min": 15, "max": 100, "step": 1}),
+                "broadcast": ("BOOLEAN", {"default": False}),
+            }
+        }
 
-        img = img.convert("RGB")
-        img = np.array(img).astype(np.float32) / 255.0
-        img = torch.from_numpy(img)[None,]
+    RETURN_TYPES = ()
+    FUNCTION = "process_video"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
 
-        return (img, mask)
+    def process_video(self, images, frame_rate, broadcast, quality):
+        if images is None or (isinstance(images, torch.Tensor) and images.size(0) == 0):
+            raise ValueError("No valid images provided")
+
+        video_binary = self._encode_video_ffmpeg(images, frame_rate, quality)
+        
+        return self._send_to_td(video_binary, broadcast)
+    
+    def _encode_video_ffmpeg(self, images, frame_rate, quality):
+        try:
+            import imageio_ffmpeg
+
+            with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as temp_file:
+                temp_path = temp_file.name
+            
+            if isinstance(images, torch.Tensor):
+                if len(images.shape) != 4:
+                    raise ValueError(f"Expected 4D tensor, got shape {images.shape}")
+                
+                images_np = images.cpu().numpy()
+                if images_np.max() <= 1.0:
+                    images_np = (images_np * 255).astype(np.uint8)
+                else:
+                    images_np = images_np.astype(np.uint8)
+            else:
+                raise TypeError("Images must be a torch.Tensor")
+            
+            height, width = images_np[0].shape[:2]
+            
+            output_params = [
+                '-c:v', 'libx264',  
+                '-preset', 'medium', 
+                '-crf', str(51 - quality//2),  
+                '-pix_fmt', 'yuv420p'  
+            ]
+            
+            writer = imageio_ffmpeg.write_frames(
+                temp_path,
+                (width, height),
+                fps=frame_rate,
+                output_params=output_params
+            )
+            
+            writer.send(None)
+
+            for img in images_np:
+                if img.shape[2] == 4:  # RGBA
+                    img = img[:, :, :3]
+                
+                if not img.flags['C_CONTIGUOUS']:
+                    img = np.ascontiguousarray(img)
+                
+                writer.send(img)
+            
+            writer.close()
+            
+            with open(temp_path, 'rb') as f:
+                video_binary = f.read()
+            
+            os.unlink(temp_path)
+            
+            return video_binary
+            
+        except Exception as e:
+            raise RuntimeError(f"Error encoding video with ffmpeg: {str(e)}")
+    
+    def _send_to_td(self, video_binary, broadcast):
+        try:
+            server = PromptServer.instance
+            sid = None if broadcast else server.client_id
+            server.send_sync(1001, video_binary, sid=sid)
+            
+            return {"ui": {
+                "video": [{
+                    "source": "websocket",
+                    "content-type": "video/mp4",
+                    "type": "output",
+                }]
+            }}
+        except Exception as e:
+            raise ValueError(f"Error sending video: {str(e)}")

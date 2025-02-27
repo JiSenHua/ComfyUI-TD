@@ -1,0 +1,70 @@
+{
+  "4": {
+    "inputs": {
+      "mask": [
+        "21",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "反转遮罩"
+    }
+  },
+  "9": {
+    "inputs": {
+      "repo_id": "JeffreyXiang/TRELLIS-image-large"
+    },
+    "class_type": "[Comfy3D] Load Trellis Structured 3D Latents Models",
+    "_meta": {
+      "title": "Load Trellis Structured 3D Latents Models"
+    }
+  },
+  "10": {
+    "inputs": {
+      "seed": 82615315223344,
+      "sparse_structure_guidance_scale": 7.5,
+      "sparse_structure_sample_steps": 12,
+      "structured_latent_guidance_scale": 3,
+      "structured_latent_sample_steps": 12,
+      "trellis_pipe": [
+        "9",
+        0
+      ],
+      "reference_image": [
+        "21",
+        0
+      ],
+      "reference_mask": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] Trellis Structured 3D Latents Models",
+    "_meta": {
+      "title": "Trellis Structured 3D Latents Models"
+    }
+  },
+  "21": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "LoadTDImage"
+    }
+  },
+  "22": {
+    "inputs": {
+      "broadcast": false,
+      "mesh": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "Comfy3DPacktoTD",
+    "_meta": {
+      "title": "Comfy3DPacktoTD"
+    }
+  }
+}
