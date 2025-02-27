@@ -8,6 +8,8 @@ Supports real-time transmission of **images**, **videos**, and **3D models (poin
 |:---:|:---:|:---:|
 | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/image.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Video.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/PointCloud.gif) |
 
+# [🇨🇳 中文版 README](README/README_zh.md)
+
 ## User Notice
 - **ComfyUI-TD** nodes are ported and optimized based on [ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main).
 - **ComfyUI-TD** requires the **ComfyUI2TD.tox** component to work.  
