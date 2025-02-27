@@ -1,0 +1,196 @@
+{
+  "1": {
+    "inputs": {
+      "text": "low quality",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 负向提示词"
+    }
+  },
+  "2": {
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "SD1.5_photon_v1.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "加载检查点"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 64
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空潜空间图像"
+    }
+  },
+  "6": {
+    "inputs": {
+      "lora_name": "AnimateLCM_sd15_t2v_lora.safetensors",
+      "strength_model": 0.8,
+      "model": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "仅加载LoRA模型"
+    }
+  },
+  "7": {
+    "inputs": {
+      "sampling": "lcm",
+      "zsnr": false,
+      "model": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingDiscrete",
+    "_meta": {
+      "title": "模型采样离散"
+    }
+  },
+  "8": {
+    "inputs": {
+      "start_percent": 0,
+      "end_percent": 1,
+      "motion_model": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "ADE_ApplyAnimateDiffModel",
+    "_meta": {
+      "title": "Apply AnimateDiff Model (Adv.) 🎭🅐🅓②"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model_name": "AnimateLCM_sd15_t2v.ckpt"
+    },
+    "class_type": "ADE_LoadAnimateDiffModel",
+    "_meta": {
+      "title": "Load AnimateDiff Model 🎭🅐🅓②"
+    }
+  },
+  "10": {
+    "inputs": {
+      "beta_schedule": "lcm avg(sqrt_linear,linear)",
+      "model": [
+        "7",
+        0
+      ],
+      "m_models": [
+        "8",
+        0
+      ],
+      "context_options": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "ADE_UseEvolvedSampling",
+    "_meta": {
+      "title": "Use Evolved Sampling 🎭🅐🅓②"
+    }
+  },
+  "11": {
+    "inputs": {
+      "seed": 33698133299972,
+      "steps": 8,
+      "cfg": 1.8,
+      "sampler_name": "lcm",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "10",
+        0
+      ],
+      "positive": [
+        "13",
+        0
+      ],
+      "negative": [
+        "1",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "13": {
+    "inputs": {
+      "text": "jellyfish in the sea,realistic,8k,best quality",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 正向提示词"
+    }
+  },
+  "20": {
+    "inputs": {
+      "context_length": 16,
+      "context_stride": 1,
+      "context_overlap": 4,
+      "fuse_method": "pyramid",
+      "use_on_equal_length": false,
+      "start_percent": 0,
+      "guarantee_steps": 1
+    },
+    "class_type": "ADE_StandardUniformContextOptions",
+    "_meta": {
+      "title": "Context Options◆Standard Uniform 🎭🅐🅓"
+    }
+  },
+  "21": {
+    "inputs": {
+      "frame_rate": 8,
+      "quality": 75,
+      "broadcast": false,
+      "images": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "VideotoTD",
+    "_meta": {
+      "title": "VideotoTD"
+    }
+  }
+}

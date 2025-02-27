@@ -1,0 +1,85 @@
+{
+  "20": {
+    "inputs": {
+      "geometry_extract_resolution": 256,
+      "marching_cude_threshold": 25,
+      "tsr_model": [
+        "21",
+        0
+      ],
+      "reference_image": [
+        "27",
+        0
+      ],
+      "reference_mask": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] TripoSR",
+    "_meta": {
+      "title": "TripoSR"
+    }
+  },
+  "21": {
+    "inputs": {
+      "model_name": "model.ckpt",
+      "chunk_size": 8192
+    },
+    "class_type": "[Comfy3D] Load TripoSR Model",
+    "_meta": {
+      "title": "Load TripoSR Model"
+    }
+  },
+  "22": {
+    "inputs": {
+      "mask": [
+        "27",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "反转遮罩"
+    }
+  },
+  "25": {
+    "inputs": {
+      "axis_x_to": "+y",
+      "axis_y_to": "+z",
+      "axis_z_to": "+x",
+      "flip_normal": false,
+      "scale": 1,
+      "mesh": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] Switch Mesh Axis",
+    "_meta": {
+      "title": "Switch Mesh Axis"
+    }
+  },
+  "26": {
+    "inputs": {
+      "broadcast": false,
+      "mesh": [
+        "25",
+        0
+      ]
+    },
+    "class_type": "Comfy3DPacktoTD",
+    "_meta": {
+      "title": "Comfy3DPacktoTD"
+    }
+  },
+  "27": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "LoadTDImage"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "20": {
+    "inputs": {
+      "mask": [
+        "44",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "反转遮罩"
+    }
+  },
+  "36": {
+    "inputs": {
+      "model_name": "model.safetensors"
+    },
+    "class_type": "[Comfy3D] Load SF3D Model",
+    "_meta": {
+      "title": "Load SF3D Model"
+    }
+  },
+  "37": {
+    "inputs": {
+      "texture_resolution": 1024,
+      "remesh_option": "None",
+      "sf3d_model": [
+        "36",
+        0
+      ],
+      "reference_image": [
+        "40",
+        0
+      ],
+      "reference_mask": [
+        "40",
+        1
+      ]
+    },
+    "class_type": "[Comfy3D] StableFast3D",
+    "_meta": {
+      "title": "StableFast3D"
+    }
+  },
+  "40": {
+    "inputs": {
+      "foreground_ratio": 0.85,
+      "images": [
+        "44",
+        0
+      ],
+      "masks": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] Resize Image Foreground",
+    "_meta": {
+      "title": "Resize Image Foreground"
+    }
+  },
+  "43": {
+    "inputs": {
+      "axis_x_to": "-x",
+      "axis_y_to": "+y",
+      "axis_z_to": "-z",
+      "flip_normal": false,
+      "scale": 1,
+      "mesh": [
+        "37",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] Switch Mesh Axis",
+    "_meta": {
+      "title": "Switch Mesh Axis"
+    }
+  },
+  "44": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "LoadTDImage"
+    }
+  },
+  "45": {
+    "inputs": {
+      "broadcast": false,
+      "mesh": [
+        "43",
+        0
+      ]
+    },
+    "class_type": "Comfy3DPacktoTD",
+    "_meta": {
+      "title": "Comfy3DPacktoTD"
+    }
+  }
+}

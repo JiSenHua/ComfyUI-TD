@@ -1,0 +1,171 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "SD1.5_dreamshaper_8.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Checkpoint 模型加载"
+    }
+  },
+  "3": {
+    "inputs": {
+      "control_net_name": "control_v11p_sd15_canny_fp16.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet 模型加载"
+    }
+  },
+  "4": {
+    "inputs": {
+      "preprocessor": "CannyEdgePreprocessor",
+      "resolution": 512,
+      "image": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "ControlNet Aux预处理器"
+    }
+  },
+  "5": {
+    "inputs": {
+      "strength": 1,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "7",
+        0
+      ],
+      "negative": [
+        "8",
+        0
+      ],
+      "control_net": [
+        "3",
+        0
+      ],
+      "image": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "ControlNet应用(高级)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "man, Comic style, hight quality",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 正向提示词"
+    }
+  },
+  "8": {
+    "inputs": {
+      "text": "bad quality, bad anatomy, worst quality, low quality, low resolution, extra fingers, blur, blurry, ugly, wrong proportions, watermark, image artifacts, lowres, ugly,  jpeg artifacts, deformed, noisy image, deformation, skin moles",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 负向提示词"
+    }
+  },
+  "9": {
+    "inputs": {
+      "seed": 0,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 0.8,
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "5",
+        1
+      ],
+      "latent_image": [
+        "13",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Ksampler 采样器"
+    }
+  },
+  "13": {
+    "inputs": {
+      "pixels": [
+        "16",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE编码"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "9",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "15": {
+    "inputs": {
+      "broadcast": false,
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "ImagetoTD",
+    "_meta": {
+      "title": "ImagetoTD"
+    }
+  },
+  "16": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "LoadTDImage"
+    }
+  }
+}

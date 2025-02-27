@@ -1,0 +1,126 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "SD1.5_dreamshaper_8.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Checkpoint 模型加载"
+    }
+  },
+  "2": {
+    "inputs": {
+      "lora_name": "SD1.5_(增加细节)add_detail.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "LoRA 模型加载"
+    }
+  },
+  "3": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Latent 潜空间(图像)大小"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": "cat, bed, realistic, high quality",
+      "clip": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 正向提示词"
+    }
+  },
+  "5": {
+    "inputs": {
+      "text": "bad quality, bad anatomy, worst quality, low quality, low resolution, extra fingers, blur, blurry, ugly, wrong proportions, watermark, image artifacts, lowres, ugly,  jpeg artifacts, deformed, noisy image, deformation, skin moles",
+      "clip": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码器 负向提示词"
+    }
+  },
+  "6": {
+    "inputs": {
+      "seed": 0,
+      "steps": 20,
+      "cfg": 8,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": [
+        "2",
+        0
+      ],
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "latent_image": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Ksampler 采样器"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "6",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "9": {
+    "inputs": {
+      "broadcast": false,
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "ImagetoTD",
+    "_meta": {
+      "title": "ImagetoTD"
+    }
+  }
+}

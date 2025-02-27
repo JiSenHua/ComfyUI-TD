@@ -1,0 +1,52 @@
+{
+  "14": {
+    "inputs": {
+      "rotate_pitch": 0,
+      "rotate_yaw": 0,
+      "rotate_roll": 0,
+      "blink": 0,
+      "eyebrow": 0,
+      "wink": 23.5,
+      "pupil_x": 0,
+      "pupil_y": 0,
+      "aaa": 0,
+      "eee": 0,
+      "woo": 0,
+      "smile": 0,
+      "src_ratio": 1,
+      "sample_ratio": 1,
+      "sample_parts": "OnlyExpression",
+      "crop_factor": 1.7000000000000002,
+      "src_image": [
+        "36",
+        0
+      ]
+    },
+    "class_type": "ExpressionEditor",
+    "_meta": {
+      "title": "Expression Editor (PHM)"
+    }
+  },
+  "36": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "LoadTDImage"
+    }
+  },
+  "37": {
+    "inputs": {
+      "broadcast": false,
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "ImagetoTD",
+    "_meta": {
+      "title": "ImagetoTD"
+    }
+  }
+}
