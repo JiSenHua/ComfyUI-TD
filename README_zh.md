@@ -6,7 +6,7 @@
 
 | | | |
 |:---:|:---:|:---:|
-| ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/image.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Video.gif) | ![](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/PointCloud.gif) |
+| ![](Image/image.gif) | ![](Image/Video.gif) | ![](Image/PointCloud.gif) |
 
 # [🇺🇸 English README](README.md)
 
@@ -50,27 +50,27 @@ git clone https://github.com/JiSenHua/ComfyUI-TD.git
 
 ## ComfyUI-TD节点说明 
 
-| ![Hy3DtoTD节点示例图](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Hy3DtoTD.png) |
+| ![Hy3DtoTD节点示例图](Image/Hy3DtoTD.png) |
 |:---|
 | **Hy3DtoTD** |
 | - 本节点支持将**Hunyuan3D_V2 混元V2**生成的GLB模型转换为点云数据，并返回至 **TD** 进行解析，从而生成对应的CHOP组件。<br>- 使用本节点需安装[ComfyUI-Hunyuan3DWrapper](https://github.com/kijai/ComfyUI-Hunyuan3DWrapper)节点。<br>- 若安装[ComfyUI-Hunyuan3DWrapper](https://github.com/kijai/ComfyUI-Hunyuan3DWrapper)遇到困难，可选择使用云端[**仙宫云**镜像](https://www.xiangongyun.com/image/detail/5f185465-ef11-42e5-ba21-3ee07acb5403)。<br>- **ComfyUI2TD.tox** 预置的工作流 **Hunyuan3DV2_PointCloud** 提供了此节点的基础用法示例，对应的`.js`工作流文件已上传至`workflow`文件夹。<br>- 最新的[ComfyUI-Hunyuan3DWrapper](https://github.com/kijai/ComfyUI-Hunyuan3DWrapper)已将所有模型工作流改为`trimesh`。<br>- 建议配套安装[ComfyUI_essentials](https://github.com/cubiq/ComfyUI_essentials)，避免运行预置工作流时报错。<br>- `broadcast`广播参数（默认关闭）：启用该参数后，生成的点云数据将广播至所有已建立 WebSocket 连接的客户端。 |
 
-| ![Tripo3DtoTD节点示例图](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Tripo3DtoTD.png) |
+| ![Tripo3DtoTD节点示例图](Image/Tripo3DtoTD.png) |
 |:---|
 | **Tripo3DtoTD** |
 | - 本节点支持将**Tripo3D**生成的GLB模型转换为点云数据，并返回至 **TD** 进行解析，从而生成对应的CHOP组件。<br>- 使用本节点需安装[ComfyUI-Tripo](https://github.com/VAST-AI-Research/ComfyUI-Tripo)节点。<br>- Tripo本非开源模型，需要进入[Tripo 官网](https://platform.tripo3d.ai/) 注册账户并申请API。<br>- **ComfyUI2TD.tox** 预置的工作流 **Tripo3D_PointCloud** 提供了此节点的基础用法示例，对应的`.js`工作流文件已上传至`workflow`文件夹。<br>- `broadcast`广播参数（默认关闭）：启用该参数后，生成的点云数据将广播至所有已建立 WebSocket 连接的客户端。 |
 
-| ![Comfy3DPacktoTD节点示例图](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/Comfy3DPacktoTD.png) |
+| ![Comfy3DPacktoTD节点示例图](Image/Comfy3DPacktoTD.png) |
 |:---|
 | **Comfy3DPacktoTD** |
 | - 本节点支持将**3DPack**生成的GLB模型转换为点云数据，并返回至 **TD** 进行解析，从而生成对应的CHOP组件。<br>- 使用本节点需安装[ComfyUI-3D-Pack](https://github.com/MrForExample/ComfyUI-3D-Pack)节点。<br>- 若安装[ComfyUI-3D-Pack](https://github.com/MrForExample/ComfyUI-3D-Pack)遇到困难，可选择使用云端[**仙宫云**镜像](https://www.xiangongyun.com/image/detail/5f185465-ef11-42e5-ba21-3ee07acb5403)。<br>- **ComfyUI2TD.tox** 预置的工作流 **3DPack_xxx_PointCloud** 提供了此节点的基础用法示例，对应的`.js`工作流文件已上传至`workflow`文件夹。<br>- **3DPack**中的**Hunyuan3D_V2**与**Hunyuan3DWrapper**并不互通，请确保使用各自对应的传输节点<br>- `broadcast`广播参数（默认关闭）：启用该参数后，生成的点云数据将广播至所有已建立 WebSocket 连接的客户端。<br>- **注意**：目前仙宫云端镜像仅对**TRELLIS**、**Hunyuan3D_V2**和**StableFast3D**进行了测试。其他3D模型尚未验证，如遇问题请在Issues中反馈。 |
 
-| ![VideotoTD节点示例图](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/VideotoTD.png) |
+| ![VideotoTD节点示例图](Image/VideotoTD.png) |
 |:---|
 | **VideotoTD** |
 | - 本节点支持将视频转为数据，并返回至 **TD** 进行解析。<br>- 将你工作流中[ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)**Video Combine 🎥🅥🅗🅢**替换成此节点。<br>- **frame_rate** 参数影响视频的合成帧率，建议选择8。<br>- **quality** 参数控制视频的压缩质量，建议选择75，以获得较好的数据大小与图像质量的平衡。<br>- 数据将通过**ComfyUI2TD.tox**解析，并生成`.MP4`格式文件保存在本地根目录中`VideoOutput`文件夹内。<br>- `broadcast`广播参数（默认关闭）：启用该参数后，生成的点云数据将广播至所有已建立 WebSocket 连接的客户端。 |
 
-| ![ImagetoTD节点示例图](https://github.com/JiSenHua/ComfyUI-TD/blob/JiSenHua-patch-1/Image/ImagetoTD.png) |
+| ![ImagetoTD节点示例图](Image/ImagetoTD.png) |
 |:---|
 | **ImagetoTD** |
 | - 基于[ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main) **Send Image (WebSocket)** 节点二次开发。<br>- 本节点支持将ComfyUI生成的图片返回至 **TD** 进行解析，从而生成对应的TOP组件。<br>- `broadcast`广播参数（默认关闭）：启用该参数后，生成的图片数据将广播至所有已建立 WebSocket 连接的客户端。<br>- **ComfyUI2TD.tox**组件至 **v_5.1.x** 版本起，预置的工作流将使用ComfyUI-TD节点，不再使用于[ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main)。 |
