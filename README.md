@@ -30,7 +30,7 @@ Supports real-time transmission of **images**, **videos**, and **3D models (poin
 ---
 
 ### Installation of ComfyUI-TD Nodes
-#### Method 1: (Currently Unavailable)
+#### Method 1: 
 - Use [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager?tab=readme-ov-file) to search for **ComfyUI-TD** and directly install the nodes.
 
 #### Method 2:
