@@ -31,9 +31,9 @@
 ---
 
 ### ComfyUI-TD节点安装 
-#### 方法一：(此方法暂时停用)
+#### 方法一：
 - 使用[ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager?tab=readme-ov-file)搜索**ComfyUI-TD**，并直接进行节点安装。  
-
+- ![Manager_nodes](Image/Manager.png)
 #### 方法二：  
 - 手动安装：将本项目下载后解压放置于`X:\ComfyUI_windows_portable\ComfyUI\custom_nodes`。
 
@@ -63,7 +63,7 @@ git clone https://github.com/JiSenHua/ComfyUI-TD.git
 | ![Comfy3DPacktoTD节点示例图](Image/Comfy3DPacktoTD.png) |
 |:---|
 | **Comfy3DPacktoTD** |
-| - 本节点支持将**3DPack**生成的GLB模型转换为点云数据，并返回至 **TD** 进行解析，从而生成对应的CHOP组件。<br>- 使用本节点需安装[ComfyUI-3D-Pack](https://github.com/MrForExample/ComfyUI-3D-Pack)节点。<br>- 若安装[ComfyUI-3D-Pack](https://github.com/MrForExample/ComfyUI-3D-Pack)遇到困难，可选择使用云端[**仙宫云**镜像](https://www.xiangongyun.com/image/detail/5f185465-ef11-42e5-ba21-3ee07acb5403)。<br>- **ComfyUI2TD.tox** 预置的工作流 **3DPack_xxx_PointCloud** 提供了此节点的基础用法示例，对应的`.js`工作流文件已上传至`workflow`文件夹。<br>- **3DPack**中的**Hunyuan3D_V2**与**Hunyuan3DWrapper**并不互通，请确保使用各自对应的传输节点<br>- `broadcast`广播参数（默认关闭）：启用该参数后，生成的点云数据将广播至所有已建立 WebSocket 连接的客户端。<br>- **注意**：目前仙宫云端镜像仅对**TRELLIS**、**Hunyuan3D_V2**和**StableFast3D**进行了测试。其他3D模型尚未验证，如遇问题请在Issues中反馈。 |
+| - 本节点支持将**3DPack**生成的GLB模型转换为点云数据，并返回至 **TD** 进行解析，从而生成对应的CHOP组件。<br>- 使用本节点需安装[ComfyUI-3D-Pack](https://github.com/MrForExample/ComfyUI-3D-Pack)节点。<br>- 若安装[ComfyUI-3D-Pack](https://github.com/MrForExample/ComfyUI-3D-Pack)遇到困难，可选择使用云端[**仙宫云**镜像](https://www.xiangongyun.com/image/detail/5f185465-ef11-42e5-ba21-3ee07acb5403)。<br>- **ComfyUI2TD.tox** 预置的工作流 **3DPack_xxx_PointCloud** 提供了此节点的基础用法示例，对应的`.js`工作流文件已上传至`workflow`文件夹。<br>- **3DPack**中的**Hunyuan3D_V2**与**Hunyuan3DWrapper**并不互通，请确保使用各自对应的传输节点<br>- `broadcast`广播参数（默认关闭）：启用该参数后，生成的点云数据将广播至所有已建立 WebSocket 连接的客户端。<br>- **注意**：目前仙宫云端镜像仅对**TRELLIS**、**Hunyuan3D_V2**、**TripoSR**和**StableFast3D**进行了测试。其他3D模型尚未验证，如遇问题请在Issues中反馈。 |
 
 | ![VideotoTD节点示例图](Image/VideotoTD.png) |
 |:---|
