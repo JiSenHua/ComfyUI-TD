@@ -33,7 +33,7 @@
 ### ComfyUI-TD节点安装 
 #### 方法一：
 - 使用[ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager?tab=readme-ov-file)搜索**ComfyUI-TD**，并直接进行节点安装。  
-
+- ![Manager_nodes](Image/Manager.png)
 #### 方法二：  
 - 手动安装：将本项目下载后解压放置于`X:\ComfyUI_windows_portable\ComfyUI\custom_nodes`。
 
