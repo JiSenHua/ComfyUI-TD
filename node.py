@@ -1,4 +1,3 @@
-import trimesh
 import struct
 import numpy as np
 import io
@@ -27,8 +26,12 @@ class Hy3DtoTD:
     CATEGORY = "TouchDesigner"
 
     def send_mesh(self, trimesh, broadcast):
-        processed_mesh = self.process_mesh(trimesh)
-        return self._send_to_td(processed_mesh, broadcast)
+        try:
+            import trimesh
+            processed_mesh = self.process_mesh(trimesh)
+            return self._send_to_td(processed_mesh, broadcast)
+        except Exception as e:
+            raise ValueError(f"Error processing mesh: {str(e)}")
 
     def process_mesh(self, mesh):
         try:
