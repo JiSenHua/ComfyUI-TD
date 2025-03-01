@@ -9,6 +9,6 @@ Repository = "https://github.com/JiSenHua/ComfyUI-TD"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "jisenhua"
 DisplayName = "ComfyUI-TD"
 Icon = ""
