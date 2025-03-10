@@ -35,6 +35,7 @@ class Hy3DtoTD:
 
     def process_mesh(self, mesh):
         try:
+            import trimesh
             if isinstance(mesh, trimesh.Scene):
                 meshes = []
                 for m in mesh.geometry.values():
@@ -106,6 +107,7 @@ class Tripo3DtoTD:
 
     def process_mesh(self, model_file):
         try:
+            import trimesh
             mesh = trimesh.load(model_file)
 
             if isinstance(mesh, trimesh.Scene):
@@ -141,6 +143,7 @@ class Tripo3DtoTD:
 
     def _process_vertex_colors(self, m):
         try:
+            import trimesh
             if not hasattr(m.visual, 'vertex_colors') or m.visual.vertex_colors is None:
                 if hasattr(m.visual, 'material'):
                     material = m.visual.material
@@ -171,6 +174,7 @@ class Tripo3DtoTD:
 
     def _extract_colors_from_texture(self, m):
         try:
+            import trimesh
             material = m.visual.material
             image = material.baseColorTexture
             if image is not None:
