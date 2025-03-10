@@ -27,7 +27,6 @@ class Hy3DtoTD:
 
     def send_mesh(self, trimesh, broadcast):
         try:
-            import trimesh
             processed_mesh = self.process_mesh(trimesh)
             return self._send_to_td(processed_mesh, broadcast)
         except Exception as e:
@@ -36,6 +35,7 @@ class Hy3DtoTD:
     def process_mesh(self, mesh):
         try:
             import trimesh
+            
             if isinstance(mesh, trimesh.Scene):
                 meshes = []
                 for m in mesh.geometry.values():
@@ -61,11 +61,15 @@ class Hy3DtoTD:
 
             return mesh
 
+        except ImportError:
+            raise ImportError("Please install the trimesh library: pip install trimesh")
         except Exception as e:
             raise ValueError(f"Error processing mesh: {str(e)}")
 
     def _send_to_td(self, mesh, broadcast):
         try:
+            import trimesh
+            
             buffer = io.BytesIO()
             mesh.export(file_obj=buffer, file_type='ply')
             binary_data = buffer.getvalue()
@@ -82,9 +86,10 @@ class Hy3DtoTD:
                     "type": "output",
                 }]
             }}
+        except ImportError:
+            raise ImportError("Please install the trimesh library: pip install trimesh")
         except Exception as e:
-            raise ValueError(f"Error sending mesh: {str(e)}")
-
+            raise ValueError(f"Error sending mesh to TouchDesigner: {str(e)}")
 
 class Tripo3DtoTD:
     @classmethod
@@ -102,12 +107,16 @@ class Tripo3DtoTD:
     CATEGORY = "TouchDesigner"
 
     def send_mesh(self, model_file, broadcast):
-        processed_mesh = self.process_mesh(model_file)
-        return self._send_to_td(processed_mesh, broadcast)
+        try:
+            processed_mesh = self.process_mesh(model_file)
+            return self._send_to_td(processed_mesh, broadcast)
+        except Exception as e:
+            raise ValueError(f"Error processing mesh: {str(e)}")
 
     def process_mesh(self, model_file):
         try:
             import trimesh
+            
             mesh = trimesh.load(model_file)
 
             if isinstance(mesh, trimesh.Scene):
@@ -138,12 +147,15 @@ class Tripo3DtoTD:
 
             return mesh
 
+        except ImportError:
+            raise ImportError("Please install the trimesh library: pip install trimesh")
         except Exception as e:
             raise ValueError(f"Error processing mesh: {str(e)}")
 
     def _process_vertex_colors(self, m):
         try:
             import trimesh
+            
             if not hasattr(m.visual, 'vertex_colors') or m.visual.vertex_colors is None:
                 if hasattr(m.visual, 'material'):
                     material = m.visual.material
@@ -169,12 +181,15 @@ class Tripo3DtoTD:
                     m.visual.vertex_colors = (m.visual.vertex_colors * 255).astype(np.uint8)
                 else:
                     m.visual.vertex_colors = m.visual.vertex_colors.astype(np.uint8)
+        except ImportError:
+            raise ImportError("Please install the trimesh library: pip install trimesh")
         except Exception as e:
             raise ValueError(f"Error processing vertex colors: {str(e)}")
 
     def _extract_colors_from_texture(self, m):
         try:
             import trimesh
+            
             material = m.visual.material
             image = material.baseColorTexture
             if image is not None:
@@ -195,6 +210,8 @@ class Tripo3DtoTD:
             else:
                 m.visual = trimesh.visual.ColorVisuals(m)
                 m.visual.vertex_colors = np.tile([200, 200, 200, 255], (len(m.vertices), 1))
+        except ImportError:
+            raise ImportError("Please install the trimesh library: pip install trimesh")
         except Exception as e:
             raise ValueError(f"Error extracting colors from texture: {str(e)}")
 
@@ -246,9 +263,10 @@ class Tripo3DtoTD:
                     "type": "output",
                 }]
             }}
+        except ImportError:
+            raise ImportError("Please install the trimesh library: pip install trimesh")
         except Exception as e:
             raise ValueError(f"Error sending mesh: {str(e)}")
-
 
 class ImagetoTD:
     @classmethod
