@@ -439,7 +439,202 @@ class Comfy3DPacktoTD:
             import traceback
             traceback.print_exc()
             raise ValueError(f"Error sending mesh: {str(e)}")
+            
+class TripoSRtoTD:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "mesh": ("MESH",),
+                "broadcast": ("BOOLEAN", {"default": False}),
+            },
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "send_to_td"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
+
+    def send_to_td(self, mesh, broadcast):
+        try:
+            if isinstance(mesh, list):
+                if len(mesh) > 0:
+                    mesh_obj = mesh[0]
+                else:
+                    raise ValueError("Empty mesh list received")
+            else:
+                mesh_obj = mesh
+            
+            if hasattr(mesh_obj, 'vertices'):
+                vertices = mesh_obj.vertices
+                if hasattr(vertices, 'cpu'):
+                    vertices = vertices.cpu()
+                if hasattr(vertices, 'numpy'):
+                    vertices = vertices.numpy()
+                vertices = vertices.astype(np.float32)
+            else:
+                raise ValueError("Cannot find vertex data in mesh object")
+            
+            rotated_vertices = vertices.copy()
+            rotated_vertices[:, 0] = -vertices[:, 0]
+            rotated_vertices[:, 1], rotated_vertices[:, 2] = vertices[:, 2], vertices[:, 1]
+            
+            final_vertices = rotated_vertices.copy()
+            final_vertices[:, 0] = rotated_vertices[:, 2]
+            final_vertices[:, 2] = -rotated_vertices[:, 0]
+            
+            vertices = final_vertices
+            
+            colors = None
+            
+            if hasattr(mesh_obj, 'visual') and mesh_obj.visual is not None:
+                visual = mesh_obj.visual
                 
+                if hasattr(visual, 'vertex_colors') and visual.vertex_colors is not None:
+                    colors = visual.vertex_colors
+                    if hasattr(colors, 'cpu'):
+                        colors = colors.cpu()
+                    if hasattr(colors, 'numpy'):
+                        colors = colors.numpy()
+                
+                elif hasattr(visual, 'face_colors') and visual.face_colors is not None:
+                    face_colors = visual.face_colors
+                    if hasattr(face_colors, 'cpu'):
+                        face_colors = face_colors.cpu()
+                    if hasattr(face_colors, 'numpy'):
+                        face_colors = face_colors.numpy()
+                    
+                    if hasattr(mesh_obj, 'faces') and mesh_obj.faces is not None:
+                        faces = mesh_obj.faces
+                        if hasattr(faces, 'cpu'):
+                            faces = faces.cpu()
+                        if hasattr(faces, 'numpy'):
+                            faces = faces.numpy()
+                        
+                        colors = np.zeros((len(vertices), 4), dtype=np.uint8)
+                        vertex_color_count = np.zeros(len(vertices), dtype=np.int32)
+                        
+                        for i, face in enumerate(faces):
+                            for vertex_idx in face:
+                                colors[vertex_idx] += face_colors[i]
+                                vertex_color_count[vertex_idx] += 1
+                        
+                        for i in range(len(vertices)):
+                            if vertex_color_count[i] > 0:
+                                colors[i] = colors[i] // vertex_color_count[i]
+                
+                elif hasattr(visual, 'material') and visual.material is not None:
+                    material = visual.material
+                    
+                    if hasattr(material, 'diffuse') and material.diffuse is not None:
+                        diffuse = material.diffuse
+                        colors = np.tile(diffuse, (len(vertices), 1))
+            
+            if colors is None and hasattr(mesh_obj, '_visual') and mesh_obj._visual is not None:
+                visual = mesh_obj._visual
+                
+                if hasattr(visual, 'vertex_colors') and visual.vertex_colors is not None:
+                    colors = visual.vertex_colors
+                    if hasattr(colors, 'cpu'):
+                        colors = colors.cpu()
+                    if hasattr(colors, 'numpy'):
+                        colors = colors.numpy()
+            
+            if colors is None and hasattr(mesh_obj, 'visual') and hasattr(mesh_obj.visual, 'uv') and mesh_obj.visual.uv is not None:
+                if hasattr(mesh_obj.visual, 'material') and hasattr(mesh_obj.visual.material, 'image'):
+                    uvs = mesh_obj.visual.uv
+                    image = mesh_obj.visual.material.image
+                    
+                    h, w = image.shape[:2]
+                    u = np.clip(uvs[:, 0], 0, 1) * (w - 1)
+                    v = np.clip(uvs[:, 1], 0, 1) * (h - 1)
+                    
+                    u_int = np.round(u).astype(np.int32)
+                    v_int = np.round(v).astype(np.int32)
+                    
+                    u_int = np.clip(u_int, 0, w - 1)
+                    v_int = np.clip(v_int, 0, h - 1)
+                    
+                    colors = image[v_int, u_int]
+            
+            if colors is None:
+                np.random.seed(42)
+                colors = np.random.randint(100, 200, size=(len(vertices), 3), dtype=np.uint8)
+                alpha = np.full((len(vertices), 1), 255, dtype=np.uint8)
+                colors = np.concatenate([colors, alpha], axis=1)
+                
+            if colors is not None:
+                if len(colors.shape) == 1:
+                    colors = np.column_stack([colors, colors, colors])
+                
+                if colors.max() <= 1.0 and colors.dtype != np.uint8:
+                    colors = (colors * 255).astype(np.uint8)
+                else:
+                    colors = np.clip(colors, 0, 255).astype(np.uint8)
+
+                if colors.shape[1] == 3:
+                    alpha = np.full((len(vertices), 1), 255, dtype=np.uint8)
+                    colors = np.concatenate([colors, alpha], axis=1)
+                elif colors.shape[1] > 4:
+                    colors = colors[:, :4]
+                
+                if len(colors) != len(vertices):
+                    if len(colors) > len(vertices):
+                        colors = colors[:len(vertices)]
+                    else:
+                        last_color = colors[-1]
+                        padding = np.tile(last_color, (len(vertices) - len(colors), 1))
+                        colors = np.vstack([colors, padding])
+
+            header = [
+                "ply",
+                "format binary_little_endian 1.0",
+                f"element vertex {len(vertices)}",
+                "property float x",
+                "property float y",
+                "property float z",
+                "property uchar red",
+                "property uchar green",
+                "property uchar blue",
+                "property uchar alpha",
+                "end_header\n"
+            ]
+            header = '\n'.join(header).encode('ascii')
+
+            binary_data = bytearray()
+            for i in range(len(vertices)):
+                binary_data.extend(struct.pack('<fff',
+                    float(vertices[i, 0]), float(vertices[i, 1]), float(vertices[i, 2])))
+                binary_data.extend(bytes([
+                    int(colors[i, 0]),
+                    int(colors[i, 1]),
+                    int(colors[i, 2]),
+                    int(colors[i, 3])
+                ]))
+
+            buffer = io.BytesIO()
+            buffer.write(header)
+            buffer.write(binary_data)
+            binary_output = buffer.getvalue()
+            buffer.close()
+
+            server = PromptServer.instance
+            sid = None if broadcast else server.client_id
+            server.send_sync(1000, binary_output, sid=sid)
+
+            return {"ui": {
+                "mesh": [{
+                    "source": "websocket",
+                    "content-type": "model/ply",
+                    "type": "output",
+                }]
+            }}
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise ValueError(f"Error sending mesh: {str(e)}")
+
 class LoadTDImage:
     #This node originates from the comfyui-tooling-nodes and utilizes the "Load Image (Base64)" functionality.
     #https://github.com/Acly/comfyui-tooling-nodes
