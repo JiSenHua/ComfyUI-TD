@@ -643,7 +643,7 @@ class LoadTDImage:
         return {"required": {"image": ("STRING", {"multiline": False})}}
 
     RETURN_TYPES = ("IMAGE", "MASK")
-    CATEGORY = "external_tooling"
+    CATEGORY = "TouchDesigner"
     FUNCTION = "load_image"
 
     def load_image(self, image):
