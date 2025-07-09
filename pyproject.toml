@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-TD"
 description = "A custom node for ComfyUI designed to facilitate the real-time transmission of rendered images, videos, or 3D models to TouchDesigner."
-version = "1.0.9"
+version = "1.1.0"
 license = {file = "LICENSE"}
 
 [project.urls]
