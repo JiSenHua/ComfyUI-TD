@@ -118,6 +118,15 @@ class Tripo3DtoTD:
     def process_mesh(self, model_file):
         try:
             import trimesh
+            if not model_file.startswith(('http://', 'https://')) and not os.path.isabs(model_file):
+                try:
+                    import folder_paths
+                    output_dir = folder_paths.get_output_directory()
+                    local_path = os.path.join(output_dir, model_file)
+                    if os.path.exists(local_path):
+                        model_file = local_path
+                except:
+                    pass
 
             mesh = trimesh.load(model_file)
 
