@@ -841,3 +841,117 @@ class VideotoTD:
             }}
         except Exception as e:
             raise ValueError(f"Error sending video: {str(e)}")
+
+class AudiotoTD:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "audio": ("AUDIO",),
+                "format": (["mp3", "wav"],),
+                "bitrate_kbps": ("INT", {"default": 192, "min": 32, "max": 512, "step": 16}),
+                "broadcast": ("BOOLEAN", {"default": False}),
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "process_audio"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
+
+    def process_audio(self, audio, format, bitrate_kbps, broadcast):
+        if audio is None or not isinstance(audio, dict):
+            raise ValueError("No valid audio dict provided")
+        if "waveform" not in audio or "sample_rate" not in audio:
+            raise ValueError("Audio dict must contain 'waveform' and 'sample_rate'")
+
+        waveform = audio["waveform"]
+        sample_rate = int(audio["sample_rate"])
+        if not isinstance(waveform, torch.Tensor):
+            raise TypeError("audio['waveform'] must be a torch.Tensor")
+        if waveform.ndim != 3:
+            raise ValueError(f"Expected waveform as 3D tensor [B, C, T], got shape {tuple(waveform.shape)}")
+        if waveform.size(0) > 1:
+            waveform = waveform[0:1, ...]
+        waveform = waveform[0]
+
+        with torch.no_grad():
+            max_abs = waveform.abs().amax()
+            if torch.isfinite(max_abs) and max_abs > 1.0:
+                waveform = waveform / max_abs
+
+        wav_np = waveform.detach().cpu().float().numpy()
+        if wav_np.ndim != 2:
+            raise ValueError(f"Waveform must be [C, T] after squeeze, got {wav_np.shape}")
+        wav_np = np.transpose(wav_np, (1, 0))
+
+        if format == "wav":
+            audio_binary, content_type = self._encode_wav(wav_np, sample_rate)
+        elif format == "mp3":  # 改为 mp3
+            audio_binary, content_type = self._encode_mp3(wav_np, sample_rate, bitrate_kbps)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+
+        return self._send_to_td(audio_binary, content_type, broadcast)
+
+    def _encode_wav(self, wav_np, sample_rate):
+        import soundfile as sf
+        buf = io.BytesIO()
+        if wav_np.ndim == 1:
+            wav_np = wav_np[:, None]
+        sf.write(buf, wav_np, samplerate=sample_rate, subtype="PCM_16", format="WAV")
+        audio_binary = buf.getvalue()
+        buf.close()
+        return audio_binary, "audio/wav"
+
+    def _encode_mp3(self, wav_np, sample_rate, bitrate_kbps):  # 重命名并修改方法
+        import imageio_ffmpeg, subprocess
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_file:  # 改为 .mp3
+            temp_path = temp_file.name
+        try:
+            channels = wav_np.shape[1] if wav_np.ndim == 2 else 1
+            if wav_np.ndim == 1:
+                wav_np = wav_np[:, None]
+                channels = 1
+            pcm = wav_np.astype(np.float32, copy=False)
+            if not pcm.flags["C_CONTIGUOUS"]:
+                pcm = np.ascontiguousarray(pcm)
+
+            cmd = [
+                imageio_ffmpeg.get_ffmpeg_exe(),
+                "-y",
+                "-f", "f32le",
+                "-ac", str(channels),
+                "-ar", str(sample_rate),
+                "-i", "pipe:0",
+                "-c:a", "libmp3lame", 
+                "-b:a", f"{int(bitrate_kbps)}k",
+                temp_path
+            ]
+            proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc.stdin.write(pcm.tobytes())
+            proc.stdin.close()
+            rc = proc.wait()
+            if rc != 0:
+                stderr = proc.stderr.read().decode("utf-8", errors="ignore")
+                raise RuntimeError(f"ffmpeg failed (code {rc}): {stderr.strip()}")
+            with open(temp_path, "rb") as f:
+                audio_binary = f.read()
+        finally:
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+        return audio_binary, "audio/mpeg"
+
+    def _send_to_td(self, audio_binary, content_type, broadcast):
+        server = PromptServer.instance
+        sid = None if broadcast else server.client_id
+        server.send_sync(1002, audio_binary, sid=sid)
+        return {"ui": {
+            "audio": [{
+                "source": "websocket",
+                "content-type": content_type,
+                "type": "output",
+            }]
+        }}
