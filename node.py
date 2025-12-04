@@ -12,6 +12,7 @@ import os
 
 
 class Hy3DtoTD:
+    #https://github.com/kijai/ComfyUI-Hunyuan3DWrapper
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -94,6 +95,7 @@ class Hy3DtoTD:
 
 
 class Tripo3DtoTD:
+    #https://github.com/VAST-AI-Research/ComfyUI-Tripo
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -369,6 +371,7 @@ class ImagetoTD_JPEG:
         return {"ui": {"images": results}}
 
 class Comfy3DPacktoTD:
+    #https://github.com/MrForExample/ComfyUI-3D-Pack
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -505,6 +508,7 @@ class Comfy3DPacktoTD:
 
 
 class TripoSRtoTD:
+    #https://github.com/flowtyone/ComfyUI-Flowty-TripoSR
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -904,9 +908,9 @@ class AudiotoTD:
         buf.close()
         return audio_binary, "audio/wav"
 
-    def _encode_mp3(self, wav_np, sample_rate, bitrate_kbps):  # 重命名并修改方法
+    def _encode_mp3(self, wav_np, sample_rate, bitrate_kbps):  
         import imageio_ffmpeg, subprocess
-        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_file:  # 改为 .mp3
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_file:  
             temp_path = temp_file.name
         try:
             channels = wav_np.shape[1] if wav_np.ndim == 2 else 1
