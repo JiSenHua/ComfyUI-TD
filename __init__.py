@@ -9,6 +9,7 @@ NODE_CLASS_MAPPINGS = {
     "TripoSRtoTD": TripoSRtoTD,
     "LoadTDImage": LoadTDImage,
     "VideotoTD": VideotoTD,
+    "AudiotoTD": AudiotoTD,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -20,4 +21,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "TripoSRtoTD": "TripoSRtoTD",
     "LoadTDImage": "LoadTDImage",
     "VideotoTD": "VideotoTD",
+    "AudiotoTD": "AudiotoTD",
 }
