@@ -4,9 +4,9 @@
 
 支持将ComfyUI生成的**图像**、**视频**、**3D模型(点云)** 、**音频**数据实时传输进TD。
 
-| ![](Image/image.gif)                    | ![](Image/Video.gif)                        |
-|:---------------------------------------:|:-------------------------------------------:|
-| ![](E:\ComfyUI-TD\Image\PointCloud.gif) | ![audio.gif](E:\ComfyUI-TD\Image\audio.gif) |
+| ![](Image/image.gif)      | ![](Image/Video.gif)          |
+|:-------------------------:|:-----------------------------:|
+| ![](Image/PointCloud.gif) | ![audio.gif](Image/audio.gif) |
 
 # [🇺🇸 English README](README.md)
 
