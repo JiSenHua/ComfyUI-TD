@@ -16,7 +16,7 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Comfy3DPacktoTD": "Comfy3DPacktoTD",
     "Hy3DtoTD": "Hy3DtoTD",
-    "GaussianSplattingtoTD": "3DGS to TouchDesigner",
+    "GaussianSplattingtoTD": "3DGStoTD",
     "ImagetoTD": "ImagetoTD",
     "ImagetoTD(JPEG)": "ImagetoTD(JPEG)",
     "Tripo3DtoTD": "Tripo3DtoTD",
