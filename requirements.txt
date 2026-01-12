@@ -1,2 +1,4 @@
 trimesh
 imageio_ffmpeg
+soundfile
+plyfile
