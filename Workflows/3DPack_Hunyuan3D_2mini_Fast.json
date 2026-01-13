@@ -1,0 +1,96 @@
+{
+  "61": {
+    "inputs": {
+      "generation_mode": "Hunyuan3D-2mini-Fast",
+      "weights_format": "safetensors",
+      "flash_vdm": true
+    },
+    "class_type": "[Comfy3D] Load Hunyuan3D V2 ShapeGen Pipeline",
+    "_meta": {
+      "title": "Load Hunyuan3D V2 ShapeGen Pipeline"
+    }
+  },
+  "71": {
+    "inputs": {
+      "generation_mode": "Turbo"
+    },
+    "class_type": "[Comfy3D] Load Hunyuan3D V2 TexGen Pipeline",
+    "_meta": {
+      "title": "Load Hunyuan3D V2 TexGen Pipeline"
+    }
+  },
+  "87": {
+    "inputs": {
+      "hunyuan3d_v2_texgen_pipe": [
+        "71",
+        0
+      ],
+      "mesh": [
+        "88",
+        0
+      ],
+      "images": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] Hunyuan3D V2 Paint Model Turbo MV",
+    "_meta": {
+      "title": "Hunyuan3D V2 Paint Model Turbo MV"
+    }
+  },
+  "88": {
+    "inputs": {
+      "seed": 313908171474737,
+      "guidance_scale": 5,
+      "num_inference_steps": 40,
+      "octree_resolution": 256,
+      "shapegen_pipe": [
+        "61",
+        0
+      ],
+      "images": [
+        "89",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] Hunyuan3D V2 ShapeGen MV",
+    "_meta": {
+      "title": "Hunyuan3D V2 ShapeGen MV"
+    }
+  },
+  "89": {
+    "inputs": {
+      "image_front": [
+        "93",
+        0
+      ]
+    },
+    "class_type": "[Comfy3D] Multi Background Remover",
+    "_meta": {
+      "title": "Multi Background Remover"
+    }
+  },
+  "90": {
+    "inputs": {
+      "broadcast": false,
+      "mesh": [
+        "87",
+        0
+      ]
+    },
+    "class_type": "Comfy3DPacktoTD",
+    "_meta": {
+      "title": "Comfy3DPacktoTD"
+    }
+  },
+  "93": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "LoadTDImage"
+    }
+  }
+}

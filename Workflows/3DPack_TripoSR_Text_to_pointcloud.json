@@ -1,7 +1,18 @@
-{
+﻿{
+  "5": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent图像"
+    }
+  },
   "6": {
     "inputs": {
-      "text": "1girl, adult woman, teal eyes, natural blonde wavy hair, detailed background, detailed face, aloha shirt, tropical forest in background, palm leaves",
+      "text": "white fox, C4D model",
       "clip": [
         "20",
         1
@@ -44,7 +55,7 @@
   "13": {
     "inputs": {
       "add_noise": true,
-      "noise_seed": 773454489337963,
+      "noise_seed": 145614292430910,
       "cfg": 1,
       "model": [
         "20",
@@ -67,7 +78,7 @@
         0
       ],
       "latent_image": [
-        "30",
+        "5",
         0
       ]
     },
@@ -87,7 +98,7 @@
   },
   "20": {
     "inputs": {
-      "ckpt_name": "sd_turbo.safetensors"
+      "ckpt_name": "sd_xl_turbo_1.0_fp16.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -108,43 +119,87 @@
       "title": "SDTurbo调度器"
     }
   },
-  "29": {
-    "inputs": {
-      "image": ""
-    },
-    "class_type": "LoadTDImage",
-    "_meta": {
-      "title": "LoadTDImage"
-    }
-  },
   "30": {
     "inputs": {
-      "pixels": [
-        "29",
+      "axis_x_to": "+y",
+      "axis_y_to": "+z",
+      "axis_z_to": "+x",
+      "flip_normal": false,
+      "scale": 1,
+      "mesh": [
+        "33",
         0
-      ],
-      "vae": [
-        "20",
-        2
       ]
     },
-    "class_type": "VAEEncode",
+    "class_type": "[Comfy3D] Switch Mesh Axis",
     "_meta": {
-      "title": "VAE编码"
+      "title": "Switch Mesh Axis"
     }
   },
   "32": {
     "inputs": {
-      "broadcast": false,
-      "quality": 95,
-      "images": [
+      "model_name": "model.ckpt",
+      "chunk_size": 8192
+    },
+    "class_type": "[Comfy3D] Load TripoSR Model",
+    "_meta": {
+      "title": "Load TripoSR Model"
+    }
+  },
+  "33": {
+    "inputs": {
+      "geometry_extract_resolution": 256,
+      "marching_cude_threshold": 25,
+      "tsr_model": [
+        "32",
+        0
+      ],
+      "reference_image": [
+        "8",
+        0
+      ],
+      "reference_mask": [
+        "37",
+        1
+      ]
+    },
+    "class_type": "[Comfy3D] TripoSR",
+    "_meta": {
+      "title": "TripoSR"
+    }
+  },
+  "37": {
+    "inputs": {
+      "model": "RMBG-2.0",
+      "sensitivity": 1,
+      "process_res": 512,
+      "mask_blur": 0,
+      "mask_offset": 0,
+      "invert_output": false,
+      "refine_foreground": false,
+      "background": "Alpha",
+      "background_color": "#222222",
+      "image": [
         "8",
         0
       ]
     },
-    "class_type": "ImagetoTD(JPEG)",
+    "class_type": "RMBG",
     "_meta": {
-      "title": "ImagetoTD(JPEG)"
+      "title": "Remove Background (RMBG)"
+    }
+  },
+  "42": {
+    "inputs": {
+      "broadcast": false,
+      "mesh": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "Comfy3DPacktoTD",
+    "_meta": {
+      "title": "Comfy3DPacktoTD"
     }
   }
 }

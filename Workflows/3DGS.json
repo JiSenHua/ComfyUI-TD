@@ -1,0 +1,52 @@
+{
+  "1": {
+    "inputs": {
+      "device": "auto",
+      "checkpoint_path": ""
+    },
+    "class_type": "LoadSharpModel",
+    "_meta": {
+      "title": "Load SHARP Model"
+    }
+  },
+  "3": {
+    "inputs": {
+      "focal_length_mm": 30,
+      "output_prefix": "sharp",
+      "model": [
+        "1",
+        0
+      ],
+      "image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "SharpPredict",
+    "_meta": {
+      "title": "SHARP Predict (Image to PLY)"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ply_path": [
+        "3",
+        0
+      ],
+      "broadcast": false
+    },
+    "class_type": "GaussianSplattingtoTD",
+    "_meta": {
+      "title": "3DGStoTD"
+    }
+  },
+  "5": {
+    "inputs": {
+      "image": ""
+    },
+    "class_type": "LoadTDImage",
+    "_meta": {
+      "title": "LoadTDImage"
+    }
+  }
+}
