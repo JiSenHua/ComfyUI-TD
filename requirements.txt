@@ -1,4 +1,4 @@
 trimesh
-imageio_ffmpeg
+imageio-ffmpeg>=0.4.0
 soundfile
-plyfile
+plyfile>=1.0.0
