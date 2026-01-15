@@ -10,7 +10,6 @@ import torch
 import tempfile
 import os
 
-
 class Hy3DtoTD:
     #https://github.com/kijai/ComfyUI-Hunyuan3DWrapper
     @classmethod
@@ -318,7 +317,6 @@ class ImagetoTD:
 
         return {"ui": {"images": results}}
 
-
 class ImagetoTD_JPEG:
     @classmethod
     def INPUT_TYPES(cls):
@@ -349,6 +347,61 @@ class ImagetoTD_JPEG:
             bytesIO = io.BytesIO()
             type_num = 1
             header = struct.pack(">I", type_num)
+            bytesIO.write(header)
+
+            image.save(bytesIO, format="JPEG", quality=quality)
+            jpeg_bytes = bytesIO.getvalue()
+
+            server = PromptServer.instance
+            sid = None if broadcast else server.client_id
+
+            server.send_sync(
+                BinaryEventTypes.PREVIEW_IMAGE,
+                jpeg_bytes,
+                sid,
+            )
+            results.append({
+                "source": "websocket",
+                "content-type": "image/jpeg",
+                "type": "output",
+            })
+
+        return {"ui": {"images": results}}
+
+class MasktoTD:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "mask": ("MASK",),
+                "broadcast": ("BOOLEAN", {"default": False}),
+            },
+            "optional": {
+                "quality": ("INT", {"default": 95, "min": 1, "max": 100}),
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "send_mask"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
+
+    def send_mask(self, mask, broadcast, quality=95):
+        import numpy as np
+        from PIL import Image
+        import io
+        import struct
+
+        results = []
+        for tensor in mask:
+            array = 255.0 * tensor.cpu().numpy()
+            array = np.clip(array, 0, 255).astype(np.uint8)
+            
+            image = Image.fromarray(array, mode='L').convert('RGB')
+
+            bytesIO = io.BytesIO()
+            type_num = 1
+            header = struct.pack(">I", type_num) 
             bytesIO.write(header)
 
             image.save(bytesIO, format="JPEG", quality=quality)
@@ -1097,3 +1150,147 @@ class GaussianSplattingtoTD:
             
         except Exception as e:
             raise ValueError(f"Error sending Gaussian Splatting data: {str(e)}")
+
+class DataToTD:
+    """Send data to TouchDesigner via WebSocket"""
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "data": ("STRING", { 
+                    "forceInput": True,
+                    "tooltip": "Data to send to TouchDesigner"
+                }),
+                "broadcast": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "If True, broadcast to all connected clients"
+                }),
+            },
+            "optional": {
+                "format": (["auto", "json", "string"], {
+                    "default": "auto",
+                    "tooltip": "Output format: auto (detect), json (serialize), string (str())"
+                }),
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "send_data"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
+
+    def send_data(self, data, broadcast, format="auto"):
+        import json
+        
+        try:
+            data_type = type(data).__name__
+            content_type = "text/plain"
+            
+            if format == "auto":
+                format = "json" if isinstance(data, (dict, list)) else "string"
+            
+            if format == "json":
+                content_type = "application/json"
+                if isinstance(data, (dict, list)):
+                    text = json.dumps(data, ensure_ascii=False)
+                else:
+                    output_data = {"type": data_type, "value": data}
+                    text = json.dumps(output_data, ensure_ascii=False)
+            else:
+                text = str(data)
+            
+            text_bytes = text.encode('utf-8')
+            
+            server = PromptServer.instance
+            sid = None if broadcast else server.client_id
+            server.send_sync(1004, text_bytes, sid=sid)
+            
+            preview = text[:100] + "..." if len(text) > 100 else text
+            print(f"[DataToTD] Sent {len(text_bytes)} bytes ({data_type}) to TouchDesigner")
+            
+            return {"ui": {
+                "string_data": [{
+                    "source": "websocket",
+                    "content-type": content_type,
+                    "type": "output",
+                    "data_type": data_type,
+                    "format": format,
+                    "length": len(text),
+                    "preview": preview
+                }]
+            }}
+            
+        except Exception as e:
+            error_msg = f"Error sending data to TD: {str(e)}"
+            print(f"[DataToTD] {error_msg}")
+            raise ValueError(error_msg)
+
+class TDtoSAM3Prompts:
+    """
+    Load SAM3 multi-region prompts from JSON string.
+    Supports raw prompts array or saved file format with metadata.
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "json_string": ("STRING", {
+                    "multiline": True,
+                    "default": "[]",
+                    "tooltip": "JSON string containing SAM3 multi-region prompts. Coordinates should be normalized [0-1]."
+                }),
+            }
+        }
+    
+    RETURN_TYPES = ("SAM3_MULTI_PROMPTS",)
+    RETURN_NAMES = ("multi_prompts",)
+    FUNCTION = "load_prompts"
+    CATEGORY = "SAM3"
+    
+    def load_prompts(self, json_string):
+        import json
+        
+        try:
+            data = json.loads(json_string.strip())
+            
+            if isinstance(data, dict):
+                if "prompts" in data:
+                    multi_prompts = data["prompts"]
+                    print(f"[SAM3 Prompts] Loaded from saved file format")
+                    if "timestamp" in data:
+                        print(f"[SAM3 Prompts]   Timestamp: {data['timestamp']}")
+                    if "image_dimensions" in data:
+                        dims = data["image_dimensions"]
+                        print(f"[SAM3 Prompts]   Original image: {dims.get('width')}x{dims.get('height')}")
+                else:
+                    raise ValueError("Dict format must contain 'prompts' key")
+                    
+            elif isinstance(data, list):
+                multi_prompts = data
+                print(f"[SAM3 Prompts] Loaded raw prompts array")
+            else:
+                raise ValueError(f"Invalid JSON format. Expected list or dict, got {type(data).__name__}")
+            
+            if not isinstance(multi_prompts, list):
+                raise ValueError(f"Prompts must be a list, got {type(multi_prompts).__name__}")
+            
+            if len(multi_prompts) == 0:
+                print(f"[SAM3 Prompts] Warning: Empty prompts list")
+                return (multi_prompts,)
+            
+            print(f"[SAM3 Prompts] Loaded {len(multi_prompts)} prompt region(s)")
+            
+            return (multi_prompts,)
+            
+        except json.JSONDecodeError as e:
+            error_msg = f"Invalid JSON syntax: {str(e)}"
+            print(f"[SAM3 Prompts] Error: {error_msg}")
+            print(f"[SAM3 Prompts] Hint: Remove comments (# ...) and use lowercase true/false")
+            raise ValueError(error_msg)
+            
+        except Exception as e:
+            error_msg = f"Error loading prompts: {str(e)}"
+            print(f"[SAM3 Prompts] Error: {error_msg}")
+            raise ValueError(error_msg)
