@@ -7,7 +7,7 @@ Supports real-time streaming of ComfyUI-generated **images**, **videos**, **poin
 | ![](Image/image.gif)      | ![](Image/Video.gif)                      |
 |:-------------------------:|:-----------------------------------------:|
 | ![](Image/PointCloud.gif) | ![gaussian.gif](Image/gaussian.gif)       |
-| ![](Image/audio.gif)      | ![logo.png](E:\ComfyUI-TD\Image\logo.png) |
+| ![](Image/audio.gif)      | ![logo.png](Image/logo.png) |
 
 # [🇨🇳 中文 README](README_zh.md)
 
