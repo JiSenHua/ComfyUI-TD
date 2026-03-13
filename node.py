@@ -1097,3 +1097,45 @@ class GaussianSplattingtoTD:
             
         except Exception as e:
             raise ValueError(f"Error sending Gaussian Splatting data: {str(e)}")
+
+class StringtoTD:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "broadcast": ("BOOLEAN", {"default": False}),
+                "prefix": ("STRING", {"default": ""}),
+            },
+            "optional": {
+                "text": ("STRING",),
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "send_string"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
+
+    def send_string(self, broadcast, prefix, text=None):
+        try:
+            if text is None:
+                text = ""
+
+            final_text = str(prefix) + str(text)
+            text_bytes = final_text.encode("utf-8")
+
+            server = PromptServer.instance
+            sid = None if broadcast else server.client_id
+            server.send_sync(1004, text_bytes, sid=sid)
+
+            return {
+                "ui": {
+                    "text": [{
+                        "source": "websocket",
+                        "content-type": "text/plain; charset=utf-8",
+                        "type": "output",
+                    }]
+                }
+            }
+        except Exception as e:
+            raise ValueError(f"Error sending string: {str(e)}")

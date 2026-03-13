@@ -11,6 +11,7 @@ NODE_CLASS_MAPPINGS = {
     "LoadTDImage": LoadTDImage,
     "VideotoTD": VideotoTD,
     "AudiotoTD": AudiotoTD,
+    "StringtoTD": StringtoTD,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -24,4 +25,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LoadTDImage": "LoadTDImage",
     "VideotoTD": "VideotoTD",
     "AudiotoTD": "AudiotoTD",
+    "StringtoTD": "StringtoTD",
 }
