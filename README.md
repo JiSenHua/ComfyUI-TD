@@ -1,8 +1,8 @@
 # ComfyUI-TD
 
-This node implements seamless data interaction between [TouchDesigner](https://derivative.ca/) (hereinafter referred to as "TD") and [ComfyUI](https://github.com/comfyanonymous/ComfyUI).
+**ComfyUI-TD** is a **[ComfyUI](https://github.com/comfyanonymous/ComfyUI) to [TouchDesigner](https://derivative.ca/)** custom node for **real-time streaming** of generated data.
 
-Supports real-time streaming of ComfyUI-generated **images**, **videos**, **point clouds (traditional PLY / Gaussian Splatting PLY)**, and **audio** into TD.
+It supports sending **images**, **videos**, **point clouds** (**traditional PLY** / **Gaussian Splatting PLY**), and **audio** from ComfyUI into TouchDesigner.
 
 | ![](Image/image.gif)      | ![](Image/Video.gif)                      |
 |:-------------------------:|:-----------------------------------------:|
