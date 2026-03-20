@@ -6,6 +6,8 @@ license = {file = "LICENSE"}
 
 [project.urls]
 Repository = "https://github.com/JiSenHua/ComfyUI-TD"
+Homepage = "https://jisenhua.github.io/ComfyUI-TD/"
+Documentation = "https://jisenhua.github.io/ComfyUI-TD/zh/"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]

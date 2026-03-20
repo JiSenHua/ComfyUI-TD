@@ -1,45 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ComfyUI-TD | ComfyUI to TouchDesigner Real-Time Streaming Node</title>
+  <title>ComfyUI-TD | ComfyUI 到 TouchDesigner 实时传输节点</title>
   <meta
     name="description"
-    content="ComfyUI-TD is a ComfyUI custom node for TouchDesigner that streams images, video, audio, point clouds, and Gaussian Splatting PLY data in real time."
+    content="ComfyUI-TD 是一个把 ComfyUI 图像、视频、音频、点云和 Gaussian Splatting PLY 数据实时传输到 TouchDesigner 的自定义节点。"
   />
   <meta
     name="keywords"
-    content="ComfyUI, TouchDesigner, ComfyUI custom node, ComfyUI-TD, ComfyUI2TD, real-time streaming, WebSocket, point cloud, Gaussian Splatting, audio streaming, video streaming"
+    content="ComfyUI, TouchDesigner, ComfyUI-TD, ComfyUI2TD, 自定义节点, 实时传输, WebSocket, 点云, 高斯泼溅, 视频传输, 音频传输"
   />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="author" content="JiSenHua" />
   <meta name="theme-color" content="#091120" />
-  <link rel="canonical" href="https://jisenhua.github.io/ComfyUI-TD/" />
+  <link rel="canonical" href="https://jisenhua.github.io/ComfyUI-TD/zh/" />
   <link rel="alternate" hreflang="en" href="https://jisenhua.github.io/ComfyUI-TD/" />
   <link rel="alternate" hreflang="zh-CN" href="https://jisenhua.github.io/ComfyUI-TD/zh/" />
   <link rel="alternate" hreflang="x-default" href="https://jisenhua.github.io/ComfyUI-TD/" />
   <link rel="icon" href="https://jisenhua.github.io/ComfyUI-TD/Image/logo.png" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="https://jisenhua.github.io/ComfyUI-TD/sitemap.xml" />
 
-  <meta property="og:title" content="ComfyUI-TD | ComfyUI to TouchDesigner Real-Time Streaming Node" />
+  <meta property="og:title" content="ComfyUI-TD | ComfyUI 到 TouchDesigner 实时传输节点" />
   <meta
     property="og:description"
-    content="Stream ComfyUI output to TouchDesigner in real time with support for images, video, audio, point clouds, and Gaussian Splatting PLY."
+    content="将 ComfyUI 生成的图像、视频、音频、点云和 Gaussian Splatting PLY 实时传输到 TouchDesigner。"
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://jisenhua.github.io/ComfyUI-TD/" />
+  <meta property="og:url" content="https://jisenhua.github.io/ComfyUI-TD/zh/" />
   <meta property="og:site_name" content="ComfyUI-TD" />
-  <meta property="og:locale" content="en_US" />
-  <meta property="og:locale:alternate" content="zh_CN" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   <meta property="og:image" content="https://jisenhua.github.io/ComfyUI-TD/Image/3DGStoTD.png" />
-  <meta property="og:image:alt" content="ComfyUI-TD preview for TouchDesigner streaming workflows" />
+  <meta property="og:image:alt" content="ComfyUI-TD 在 TouchDesigner 中的实时传输预览" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ComfyUI-TD | ComfyUI to TouchDesigner Real-Time Streaming Node" />
+  <meta name="twitter:title" content="ComfyUI-TD | ComfyUI 到 TouchDesigner 实时传输节点" />
   <meta
     name="twitter:description"
-    content="A ComfyUI custom node for TouchDesigner with real-time image, video, audio, point cloud, and Gaussian Splatting streaming."
+    content="ComfyUI-TD 支持图像、视频、音频、点云和 Gaussian Splatting PLY 到 TouchDesigner 的实时传输。"
   />
   <meta name="twitter:image" content="https://jisenhua.github.io/ComfyUI-TD/Image/3DGStoTD.png" />
 
@@ -50,16 +50,16 @@
         {
           "@type": "SoftwareApplication",
           "name": "ComfyUI-TD",
-          "alternateName": "ComfyUI2TD custom node",
+          "alternateName": "ComfyUI2TD 自定义节点",
           "applicationCategory": "MultimediaApplication",
           "operatingSystem": "Windows, macOS, Linux",
-          "inLanguage": ["en", "zh-CN"],
-          "description": "ComfyUI-TD is a ComfyUI custom node for real-time streaming of images, video, audio, point clouds, and Gaussian Splatting PLY data into TouchDesigner.",
-          "url": "https://jisenhua.github.io/ComfyUI-TD/",
+          "inLanguage": ["zh-CN", "en"],
+          "description": "ComfyUI-TD 是一个将 ComfyUI 生成的图像、视频、音频、点云和 Gaussian Splatting PLY 数据实时传输到 TouchDesigner 的自定义节点。",
+          "url": "https://jisenhua.github.io/ComfyUI-TD/zh/",
           "image": "https://jisenhua.github.io/ComfyUI-TD/Image/3DGStoTD.png",
           "codeRepository": "https://github.com/JiSenHua/ComfyUI-TD",
           "downloadUrl": "https://github.com/JiSenHua/ComfyUI-TD",
-          "softwareHelp": "https://github.com/JiSenHua/ComfyUI-TD#readme",
+          "softwareHelp": "https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md",
           "author": {
             "@type": "Person",
             "name": "JiSenHua"
@@ -75,34 +75,34 @@
           "mainEntity": [
             {
               "@type": "Question",
-              "name": "What is ComfyUI-TD?",
+              "name": "ComfyUI-TD 是什么？",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "ComfyUI-TD is a ComfyUI custom node that sends generated images, video, audio, point clouds, and Gaussian Splatting PLY data to TouchDesigner in real time."
+                "text": "ComfyUI-TD 是一个把 ComfyUI 生成结果实时传输到 TouchDesigner 的自定义节点，支持图像、视频、音频、点云和 Gaussian Splatting PLY。"
               }
             },
             {
               "@type": "Question",
-              "name": "Does ComfyUI-TD require ComfyUI2TD.tox?",
+              "name": "是否必须搭配 ComfyUI2TD.tox？",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Yes. ComfyUI-TD is designed to work together with the ComfyUI2TD.tox component for receiving and parsing streamed data inside TouchDesigner."
+                "text": "是的。ComfyUI-TD 需要与 ComfyUI2TD.tox 配合使用，用于在 TouchDesigner 中接收和解析传输数据。"
               }
             },
             {
               "@type": "Question",
-              "name": "Which data types are supported?",
+              "name": "支持哪些数据类型？",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "The project supports image, video, audio, traditional point cloud PLY data, and Gaussian Splatting PLY workflows."
+                "text": "支持图像、视频、音频、传统 PLY 点云以及 Gaussian Splatting PLY 工作流。"
               }
             },
             {
               "@type": "Question",
-              "name": "How do I install ComfyUI-TD?",
+              "name": "怎么安装 ComfyUI-TD？",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "You can install ComfyUI-TD with ComfyUI-Manager, by manually copying it into custom_nodes, or by using git clone from the GitHub repository."
+                "text": "可以通过 ComfyUI-Manager 安装，也可以手动复制到 custom_nodes 目录，或使用 git clone 从 GitHub 仓库安装。"
               }
             }
           ]
@@ -134,8 +134,8 @@
 
     body {
       margin: 0;
-      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.7;
+      font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+      line-height: 1.75;
       color: var(--text);
       background:
         radial-gradient(circle at top left, rgba(77, 164, 255, 0.18), transparent 30%),
@@ -263,8 +263,8 @@
 
     h1 {
       margin: 0 0 14px;
-      font-size: clamp(2.2rem, 4vw, 3.3rem);
-      line-height: 1.08;
+      font-size: clamp(2.1rem, 4vw, 3.2rem);
+      line-height: 1.12;
     }
 
     h2 {
@@ -391,220 +391,221 @@
   <div class="container">
     <header class="topbar">
       <div class="brand">
-        <img src="Image/logo.png" alt="ComfyUI-TD logo" width="52" height="52" />
+        <img src="../Image/logo.png" alt="ComfyUI-TD 标志" width="52" height="52" />
         <div>
           <p class="brand-title">ComfyUI-TD</p>
-          <p class="brand-subtitle">ComfyUI to TouchDesigner real-time streaming node</p>
+          <p class="brand-subtitle">ComfyUI 到 TouchDesigner 实时传输节点</p>
         </div>
       </div>
 
-      <nav class="lang-links" aria-label="Language switcher">
-        <a class="active" href="https://jisenhua.github.io/ComfyUI-TD/" lang="en">English</a>
-        <a href="https://jisenhua.github.io/ComfyUI-TD/zh/" lang="zh-CN">中文</a>
+      <nav class="lang-links" aria-label="语言切换">
+        <a href="https://jisenhua.github.io/ComfyUI-TD/" lang="en">English</a>
+        <a class="active" href="https://jisenhua.github.io/ComfyUI-TD/zh/" lang="zh-CN">中文</a>
       </nav>
     </header>
 
     <section class="hero">
       <div class="hero-copy">
-        <div class="eyebrow">ComfyUI custom node for TouchDesigner workflows</div>
-        <h1>Stream ComfyUI output into TouchDesigner in real time</h1>
+        <div class="eyebrow">用于 TouchDesigner 工作流的 ComfyUI 自定义节点</div>
+        <h1>把 ComfyUI 生成结果实时传输到 TouchDesigner</h1>
         <p class="lead">
-          ComfyUI-TD connects <strong>ComfyUI</strong> and <strong>TouchDesigner</strong> through a
-          more stable <strong>WebSocket</strong> workflow for <strong>images</strong>,
-          <strong>video</strong>, <strong>audio</strong>, <strong>point clouds</strong>, and
-          <strong>Gaussian Splatting PLY</strong>.
+          <strong>ComfyUI-TD</strong> 通过更稳定的 <strong>WebSocket</strong> 工作流，把
+          <strong>图像</strong>、<strong>视频</strong>、<strong>音频</strong>、
+          <strong>点云</strong> 和 <strong>Gaussian Splatting PLY</strong>
+          从 ComfyUI 发送到 TouchDesigner。
         </p>
         <p>
-          The project is built for creators, technical artists, and developers who want a practical
-          bridge between AI generation pipelines and real-time media systems.
+          这个项目适合创作者、技术美术和开发者，用来打通 AI 生成流程与实时媒体系统。
         </p>
         <div class="cta-row">
-          <a class="button primary" href="https://github.com/JiSenHua/ComfyUI-TD">View on GitHub</a>
-          <a class="button secondary" href="https://github.com/JiSenHua/ComfyUI-TD#readme">Read README</a>
-          <a class="button secondary" href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">Chinese README</a>
+          <a class="button primary" href="https://github.com/JiSenHua/ComfyUI-TD">查看 GitHub</a>
+          <a class="button secondary" href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">中文 README</a>
+          <a class="button secondary" href="https://github.com/JiSenHua/ComfyUI-TD#readme">English README</a>
         </div>
-        <div class="tag-list" aria-label="Project topics">
+        <div class="tag-list" aria-label="项目关键词">
           <span class="tag">ComfyUI</span>
           <span class="tag">TouchDesigner</span>
           <span class="tag">WebSocket</span>
-          <span class="tag">Image Streaming</span>
-          <span class="tag">Video Streaming</span>
-          <span class="tag">Audio Streaming</span>
-          <span class="tag">Point Cloud</span>
-          <span class="tag">Gaussian Splatting</span>
+          <span class="tag">图像传输</span>
+          <span class="tag">视频传输</span>
+          <span class="tag">音频传输</span>
+          <span class="tag">点云</span>
+          <span class="tag">高斯泼溅</span>
         </div>
       </div>
 
       <article class="hero-media">
         <img
-          src="Image/gaussian.gif"
-          alt="ComfyUI-TD Gaussian Splatting preview in TouchDesigner"
+          src="../Image/gaussian.gif"
+          alt="ComfyUI-TD 在 TouchDesigner 中的 Gaussian Splatting 预览"
           width="960"
           height="540"
         />
         <div class="hero-media-copy">
-          <h2>Why people search for ComfyUI-TD</h2>
+          <h2>为什么很多人会搜索 ComfyUI-TD</h2>
           <p class="muted">
-            ComfyUI-TD is used for TouchDesigner integration, cloud ComfyUI workflows, WebSocket
-            media streaming, and 3D or Gaussian Splatting previews inside TD.
+            它常被用于 TouchDesigner 接入 ComfyUI、云端 ComfyUI 回传、本地实时视觉系统，
+            以及点云和 Gaussian Splatting 的可视化工作流。
           </p>
         </div>
       </article>
     </section>
 
-    <section class="card" aria-label="Page sections">
+    <section class="card" aria-label="页面导航">
       <div class="quick-links">
-        <strong>Jump to:</strong>
+        <strong>快速跳转：</strong>
         <nav>
-          <a href="#features">Features</a>
-          <a href="#install">Installation</a>
-          <a href="#tutorials">Tutorials</a>
-          <a href="#faq">FAQ</a>
-          <a href="#links">Links</a>
+          <a href="#features">功能</a>
+          <a href="#install">安装</a>
+          <a href="#tutorials">教程</a>
+          <a href="#faq">常见问题</a>
+          <a href="#links">相关链接</a>
         </nav>
       </div>
     </section>
 
     <main>
       <section id="features" class="card">
-        <h2>Core features</h2>
+        <h2>核心功能</h2>
         <p class="muted">
-          ComfyUI-TD focuses on reliable real-time data transmission from ComfyUI into TouchDesigner.
+          ComfyUI-TD 的重点是把 ComfyUI 生成数据稳定地实时传输到 TouchDesigner。
         </p>
         <div class="features">
           <article class="media-card">
-            <img src="Image/image.gif" alt="Image streaming from ComfyUI to TouchDesigner" loading="lazy" width="800" height="450" />
+            <img src="../Image/image.gif" alt="ComfyUI 图像实时传输到 TouchDesigner" loading="lazy" width="800" height="450" />
             <div class="media-body">
-              <h3>Image workflows</h3>
-              <p class="muted">Send generated images to TouchDesigner and parse them into TOP workflows.</p>
+              <h3>图像工作流</h3>
+              <p class="muted">将 ComfyUI 生成图像传给 TouchDesigner，并解析为 TOP 流程。</p>
             </div>
           </article>
           <article class="media-card">
-            <img src="Image/Video.gif" alt="Video streaming from ComfyUI to TouchDesigner" loading="lazy" width="800" height="450" />
+            <img src="../Image/Video.gif" alt="ComfyUI 视频实时传输到 TouchDesigner" loading="lazy" width="800" height="450" />
             <div class="media-body">
-              <h3>Video and audio</h3>
-              <p class="muted">Transfer video and audio output for live visuals, playback, and generative systems.</p>
+              <h3>视频与音频</h3>
+              <p class="muted">支持视频和音频输出，适合实时视觉、播放和交互式系统。</p>
             </div>
           </article>
           <article class="media-card">
-            <img src="Image/PointCloud.gif" alt="Point cloud and 3D data transmission preview" loading="lazy" width="800" height="450" />
+            <img src="../Image/PointCloud.gif" alt="点云和 3D 数据传输预览" loading="lazy" width="800" height="450" />
             <div class="media-body">
-              <h3>3D and Gaussian Splatting</h3>
-              <p class="muted">Support traditional point clouds and Gaussian Splatting PLY workflows in TouchDesigner.</p>
+              <h3>3D 与 Gaussian Splatting</h3>
+              <p class="muted">支持传统点云和 Gaussian Splatting PLY 在 TouchDesigner 中使用。</p>
             </div>
           </article>
         </div>
         <p class="note">
-          ComfyUI-TD must be used together with <code>ComfyUI2TD.tox</code>. Keeping the tox
-          component updated is recommended.
+          ComfyUI-TD 需要与 <code>ComfyUI2TD.tox</code> 配合使用，建议同步更新到较新的 tox 版本。
         </p>
       </section>
 
       <section class="grid">
         <article class="card">
-          <h2>Supported data types</h2>
+          <h2>支持的数据类型</h2>
           <ul class="list">
-            <li>Images from ComfyUI generation pipelines</li>
-            <li>Video data for live playback inside TouchDesigner</li>
-            <li>Audio output for CHOP-based workflows</li>
-            <li>Traditional PLY point cloud data</li>
-            <li>Gaussian Splatting PLY data</li>
+            <li>ComfyUI 生成图像</li>
+            <li>用于 TouchDesigner 实时播放的视频数据</li>
+            <li>适用于 CHOP 工作流的音频输出</li>
+            <li>传统 PLY 点云数据</li>
+            <li>Gaussian Splatting PLY 数据</li>
           </ul>
         </article>
 
         <article class="card">
-          <h2>Typical use cases</h2>
+          <h2>典型使用场景</h2>
           <ul class="list">
-            <li>Interactive installations powered by ComfyUI and TouchDesigner</li>
-            <li>Cloud-based ComfyUI output streamed back to local TD systems</li>
-            <li>Technical art pipelines that mix AI generation with real-time visuals</li>
-            <li>3D preview and point-cloud-based media systems</li>
+            <li>基于 ComfyUI 与 TouchDesigner 的互动装置</li>
+            <li>云端 ComfyUI 输出回传到本地 TD</li>
+            <li>结合 AI 生成和实时视觉的技术美术流程</li>
+            <li>点云、3D 与 Gaussian Splatting 的可视化系统</li>
           </ul>
         </article>
       </section>
 
       <section id="install" class="grid">
         <article class="card">
-          <h2>Installation options</h2>
-          <h3>Method 1: ComfyUI-Manager</h3>
-          <p>Search for <code>ComfyUI-TD</code> in ComfyUI-Manager and install it directly.</p>
+          <h2>安装方式</h2>
+          <h3>方式 1：ComfyUI-Manager</h3>
+          <p>在 ComfyUI-Manager 中搜索 <code>ComfyUI-TD</code> 并直接安装。</p>
 
-          <h3>Method 2: Manual install</h3>
-          <p>Copy the project into <code>ComfyUI/custom_nodes</code>.</p>
+          <h3>方式 2：手动安装</h3>
+          <p>将项目复制到 <code>ComfyUI/custom_nodes</code> 目录。</p>
 
-          <h3>Method 3: Git clone</h3>
+          <h3>方式 3：Git Clone</h3>
           <pre><code>cd custom_nodes
 git clone https://github.com/JiSenHua/ComfyUI-TD.git</code></pre>
         </article>
 
         <article class="card">
-          <h2>Workflow notes</h2>
+          <h2>使用说明</h2>
           <ul class="list">
-            <li>Some nodes are ported and optimized from ComfyUI-Tooling-Nodes.</li>
-            <li>The rewritten WebSocket interface improves return stability in weak network conditions.</li>
-            <li>Preset workflows from newer versions no longer depend on ComfyUI-Tooling-Nodes.</li>
-            <li>Cloud deployment is supported for users who run ComfyUI remotely.</li>
+            <li>部分节点基于 ComfyUI-Tooling-Nodes 进行了移植和优化。</li>
+            <li>重写后的 WebSocket 接口更适合弱网络环境下的数据返回。</li>
+            <li>较新版本的预设工作流已经不再依赖 ComfyUI-Tooling-Nodes。</li>
+            <li>如果你使用远程服务器运行 ComfyUI，也可以走云端传输方案。</li>
           </ul>
         </article>
       </section>
 
       <section id="tutorials" class="grid">
         <article class="card">
-          <h2>Video tutorials</h2>
-          <p class="muted">Current tutorial videos are published in Chinese on Bilibili.</p>
+          <h2>视频教程</h2>
+          <p class="muted">当前教程主要发布在哔哩哔哩，内容为中文。</p>
           <ol class="list">
-            <li><a href="https://www.bilibili.com/video/BV1BqQ8YDEJq/?share_source=copy_web&amp;vd_source=3900738a289821efe0ce52f9c9fb663f">ComfyUI2TD v5.1 new version tutorial</a></li>
-            <li><a href="https://www.bilibili.com/video/BV18t4oeNEgj/?share_source=copy_web&amp;vd_source=3900738a289821efe0ce52f9c9fb663f">ComfyUI2TD basic tutorial</a></li>
-            <li><a href="https://www.bilibili.com/video/BV1RxUyYyEeU/?share_source=copy_web&amp;vd_source=3900738a289821efe0ce52f9c9fb663f">Cloud deployment tutorial with Xiangongyun</a></li>
+            <li><a href="https://www.bilibili.com/video/BV1BqQ8YDEJq/?share_source=copy_web&amp;vd_source=3900738a289821efe0ce52f9c9fb663f">ComfyUI2TD v5.1 新版本教程</a></li>
+            <li><a href="https://www.bilibili.com/video/BV18t4oeNEgj/?share_source=copy_web&amp;vd_source=3900738a289821efe0ce52f9c9fb663f">ComfyUI2TD 基础教程</a></li>
+            <li><a href="https://www.bilibili.com/video/BV1RxUyYyEeU/?share_source=copy_web&amp;vd_source=3900738a289821efe0ce52f9c9fb663f">仙宫云端部署教程</a></li>
           </ol>
         </article>
 
         <article class="card">
-          <h2>Documentation and resources</h2>
+          <h2>文档与资源</h2>
           <ul class="list">
-            <li><a href="https://github.com/JiSenHua/ComfyUI-TD">GitHub repository</a></li>
-            <li><a href="https://github.com/JiSenHua/ComfyUI-TD#readme">English documentation</a></li>
-            <li><a href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">Chinese documentation</a></li>
-            <li><a href="https://www.xiangongyun.com/register/YALSMH">Xiangongyun cloud service</a></li>
+            <li><a href="https://github.com/JiSenHua/ComfyUI-TD">GitHub 仓库</a></li>
+            <li><a href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">中文文档</a></li>
+            <li><a href="https://github.com/JiSenHua/ComfyUI-TD#readme">英文文档</a></li>
+            <li><a href="https://www.xiangongyun.com/register/YALSMH">仙宫云服务</a></li>
           </ul>
         </article>
       </section>
 
       <section id="faq" class="card">
-        <h2>FAQ</h2>
+        <h2>常见问题</h2>
         <article class="faq-item">
-          <h3>What is ComfyUI-TD?</h3>
-          <p class="muted">It is a ComfyUI custom node that sends generated media and 3D data into TouchDesigner in real time.</p>
+          <h3>ComfyUI-TD 是什么？</h3>
+          <p class="muted">它是一个将 ComfyUI 生成媒体和 3D 数据实时传输到 TouchDesigner 的自定义节点。</p>
         </article>
         <article class="faq-item">
-          <h3>Do I need ComfyUI2TD.tox?</h3>
-          <p class="muted">Yes. ComfyUI-TD is designed to work together with the <code>ComfyUI2TD.tox</code> component.</p>
+          <h3>是否必须配合 ComfyUI2TD.tox？</h3>
+          <p class="muted">是的。ComfyUI-TD 需要和 <code>ComfyUI2TD.tox</code> 一起使用。</p>
         </article>
         <article class="faq-item">
-          <h3>Does the project support video, audio, and point clouds?</h3>
-          <p class="muted">Yes. The project supports image, video, audio, point cloud PLY, and Gaussian Splatting PLY workflows.</p>
+          <h3>是否支持视频、音频和点云？</h3>
+          <p class="muted">支持。当前支持图像、视频、音频、传统点云 PLY 和 Gaussian Splatting PLY。</p>
         </article>
         <article class="faq-item">
-          <h3>Is there a Chinese page for Baidu indexing?</h3>
-          <p class="muted">Yes. A dedicated Chinese landing page is available at <a href="https://jisenhua.github.io/ComfyUI-TD/zh/">/zh/</a>.</p>
+          <h3>有没有英文页面给 Google/Bing 使用？</h3>
+          <p class="muted">
+            有。英文独立页面位于 <a href="https://jisenhua.github.io/ComfyUI-TD/">首页</a>，已通过
+            <code>hreflang</code> 与本站中文页互相标注。
+          </p>
         </article>
       </section>
 
       <section id="links" class="grid">
         <article class="card">
-          <h2>Project links</h2>
+          <h2>项目链接</h2>
           <ul class="list">
-            <li><a href="https://jisenhua.github.io/ComfyUI-TD/">Project homepage</a></li>
-            <li><a href="https://jisenhua.github.io/ComfyUI-TD/zh/">Chinese homepage</a></li>
-            <li><a href="https://github.com/JiSenHua/ComfyUI-TD">Source code on GitHub</a></li>
+            <li><a href="https://jisenhua.github.io/ComfyUI-TD/">英文主页</a></li>
+            <li><a href="https://jisenhua.github.io/ComfyUI-TD/zh/">中文主页</a></li>
+            <li><a href="https://github.com/JiSenHua/ComfyUI-TD">GitHub 源码仓库</a></li>
           </ul>
         </article>
 
         <article class="card">
-          <h2>Acknowledgements</h2>
+          <h2>致谢</h2>
           <p class="muted">
-            The legacy <code>ComfyUI2TD.tox</code> component was developed from the TDComfyUI project.
-            Thanks to olegchomp and related contributors.
+            旧版 <code>ComfyUI2TD.tox</code> 组件基于 TDComfyUI 项目发展而来，感谢 olegchomp
+            以及相关贡献者。
           </p>
         </article>
       </section>

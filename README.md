@@ -4,6 +4,10 @@
 
 It supports sending **images**, **videos**, **point clouds** (**traditional PLY** / **Gaussian Splatting PLY**), and **audio** from ComfyUI into TouchDesigner.
 
+- Project website: https://jisenhua.github.io/ComfyUI-TD/
+- Chinese website: https://jisenhua.github.io/ComfyUI-TD/zh/
+- Chinese README: [README_zh.md](README_zh.md)
+
 | ![](Image/image.gif)      | ![](Image/Video.gif)                      |
 |:-------------------------:|:-----------------------------------------:|
 | ![](Image/PointCloud.gif) | ![gaussian.gif](Image/gaussian.gif)       |

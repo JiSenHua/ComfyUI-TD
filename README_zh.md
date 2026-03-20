@@ -4,6 +4,10 @@
 
 支持将 ComfyUI 生成的 **图像**、**视频**、**点云（传统 PLY / 高斯泼溅 PLY）**、**音频** 实时传输进 TD。
 
+- 英文主页：https://jisenhua.github.io/ComfyUI-TD/
+- 中文主页：https://jisenhua.github.io/ComfyUI-TD/zh/
+- GitHub 仓库：https://github.com/JiSenHua/ComfyUI-TD
+
 | ![](Image/image.gif)      | ![](Image/Video.gif)                      |
 |:-------------------------:|:-----------------------------------------:|
 | ![](Image/PointCloud.gif) | ![gaussian.gif](Image/gaussian.gif)       |
