@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ComfyUI-TD | ComfyUI to TouchDesigner Custom Node</title>
+  <meta
+    name="description"
+    content="ComfyUI-TD is a ComfyUI to TouchDesigner custom node for real-time streaming of generated images, videos, point clouds, Gaussian Splatting PLY, and audio."
+  />
+  <meta
+    name="keywords"
+    content="ComfyUI, TouchDesigner, ComfyUI-TD, ComfyUI2TD, custom node, WebSocket, point cloud, Gaussian Splatting, audio streaming, video streaming"
+  />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://jisenhua.github.io/ComfyUI-TD/" />
+
+  <meta property="og:title" content="ComfyUI-TD | ComfyUI to TouchDesigner Custom Node" />
+  <meta
+    property="og:description"
+    content="Real-time streaming from ComfyUI to TouchDesigner for images, videos, point clouds, Gaussian Splatting PLY, and audio."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://jisenhua.github.io/ComfyUI-TD/" />
+  <meta property="og:site_name" content="ComfyUI-TD" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ComfyUI-TD | ComfyUI to TouchDesigner Custom Node" />
+  <meta
+    name="twitter:description"
+    content="Real-time streaming from ComfyUI to TouchDesigner for images, videos, point clouds, Gaussian Splatting PLY, and audio."
+  />
+
+  <style>
+    :root {
+      --bg: #08111f;
+      --panel: #101a2d;
+      --panel-2: #142038;
+      --text: #edf4ff;
+      --muted: #a8b6cf;
+      --border: #263554;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary: #1d293b;
+      --success: #16a34a;
+      --tag: #162236;
+      --shadow: rgba(0, 0, 0, 0.28);
+      --max-width: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.15), transparent 28%),
+        radial-gradient(circle at top right, rgba(34,197,94,0.10), transparent 22%),
+        linear-gradient(180deg, #08111f 0%, #0b1424 100%);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      color: #8fc3ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: contain;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 6px;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 999px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: 0.2s ease;
+    }
+
+    .lang-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 12px 30px var(--shadow);
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: 2.7rem;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.06rem;
+      margin-bottom: 18px;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      transition: 0.2s ease;
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: white;
+      border-color: transparent;
+    }
+
+    .btn.primary:hover {
+      background: var(--primary-hover);
+      text-decoration: none;
+    }
+
+    .btn.secondary {
+      background: var(--secondary);
+      color: var(--text);
+    }
+
+    .btn.secondary:hover {
+      text-decoration: none;
+      background: #273244;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      background: var(--tag);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+    }
+
+    .hero-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .hero-preview img {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #0a1322;
+    }
+
+    .hero-preview-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1.35rem;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 1.05rem;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    ul, ol {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    code {
+      background: rgba(255,255,255,0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    pre {
+      background: #0a1020;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      color: #dbeafe;
+      margin-top: 12px;
+    }
+
+    .notice {
+      border-left: 4px solid var(--success);
+      padding-left: 14px;
+    }
+
+    .media-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px var(--shadow);
+    }
+
+    .media-card img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #0a1322;
+    }
+
+    .media-body {
+      padding: 14px 16px 16px;
+    }
+
+    .media-title {
+      margin: 0 0 6px;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .media-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .links-list a {
+      word-break: break-word;
+    }
+
+    footer {
+      color: var(--muted);
+      padding: 14px 4px 50px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    [data-lang-content] {
+      display: none;
+    }
+
+    [data-lang-content].active {
+      display: block;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 2.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand-wrap">
+        <img class="brand-logo" src="Image/logo.png" alt="ComfyUI-TD logo" />
+        <div class="brand-text">
+          <div class="brand-title">ComfyUI-TD</div>
+          <div class="brand-subtitle">ComfyUI to TouchDesigner custom node</div>
+        </div>
+      </div>
+
+      <div class="lang-switch" aria-label="Language switcher">
+        <button class="lang-btn active" data-lang-btn="en">English</button>
+        <button class="lang-btn" data-lang-btn="zh">中文</button>
+      </div>
+    </div>
+
+    <div data-lang-content="en" class="active">
+      <section class="hero">
+        <div class="card">
+          <h1>Real-time streaming from ComfyUI to TouchDesigner</h1>
+          <div class="subtitle">
+            A ComfyUI custom node for sending generated images, videos, point clouds, Gaussian Splatting PLY, and audio directly into TouchDesigner.
+          </div>
+
+          <p>
+            <strong>ComfyUI-TD</strong> is designed for creators and developers who want to bridge
+            AI generation workflows with real-time media systems.
+          </p>
+          <p>
+            It works together with <strong>ComfyUI2TD.tox</strong> and provides a more stable
+            streaming experience through a rewritten WebSocket interface.
+          </p>
+
+          <div class="cta-group">
+            <a class="btn primary" href="https://github.com/JiSenHua/ComfyUI-TD">View on GitHub</a>
+            <a class="btn secondary" href="https://github.com/JiSenHua/ComfyUI-TD#readme">Read README</a>
+            <a class="btn secondary" href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">中文 README</a>
+          </div>
+
+          <div class="tags">
+            <span class="tag">ComfyUI</span>
+            <span class="tag">TouchDesigner</span>
+            <span class="tag">WebSocket</span>
+            <span class="tag">Image</span>
+            <span class="tag">Video</span>
+            <span class="tag">Audio</span>
+            <span class="tag">Point Cloud</span>
+            <span class="tag">Gaussian Splatting</span>
+          </div>
+        </div>
+
+        <div class="card hero-preview">
+          <img src="Image/gaussian.gif" alt="Gaussian Splatting preview" />
+          <div class="hero-preview-note">
+            Live preview example from the repository assets.
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Supported data types</h2>
+        <div class="grid-3">
+          <div class="media-card">
+            <img src="Image/image.gif" alt="Image streaming preview" />
+            <div class="media-body">
+              <p class="media-title">Image</p>
+              <p class="media-desc">Stream generated image results from ComfyUI into TouchDesigner.</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/Video.gif" alt="Video streaming preview" />
+            <div class="media-body">
+              <p class="media-title">Video</p>
+              <p class="media-desc">Transfer video outputs for real-time playback and visual systems.</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/audio.gif" alt="Audio streaming preview" />
+            <div class="media-body">
+              <p class="media-title">Audio</p>
+              <p class="media-desc">Send generated or processed audio data into TouchDesigner workflows.</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/PointCloud.gif" alt="Point cloud streaming preview" />
+            <div class="media-body">
+              <p class="media-title">Point Cloud</p>
+              <p class="media-desc">Support traditional point cloud and 3D model transmission workflows.</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/gaussian.gif" alt="Gaussian splatting preview" />
+            <div class="media-body">
+              <p class="media-title">Gaussian Splatting PLY</p>
+              <p class="media-desc">Work with Gaussian Splatting PLY data inside TouchDesigner pipelines.</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/logo.png" alt="ComfyUI-TD logo" />
+            <div class="media-body">
+              <p class="media-title">ComfyUI2TD Ecosystem</p>
+              <p class="media-desc">Built to work together with the ComfyUI2TD.tox component.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Overview</h2>
+          <p>
+            ComfyUI-TD is a ComfyUI to TouchDesigner custom node for real-time streaming of generated data.
+          </p>
+          <ul>
+            <li>Images</li>
+            <li>Videos</li>
+            <li>Audio</li>
+            <li>Traditional PLY point clouds</li>
+            <li>Gaussian Splatting PLY</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>User Notice</h2>
+          <ul>
+            <li>Some nodes are ported and optimized from ComfyUI-Tooling-Nodes.</li>
+            <li>ComfyUI-TD must be used with <code>ComfyUI2TD.tox</code>.</li>
+            <li>Please update <code>ComfyUI2TD.tox</code> to <code>v_5.1.x</code> or higher.</li>
+            <li>This version includes a full code refactor with video and 3D model transmission support.</li>
+            <li>The WebSocket interface was rewritten to improve data return reliability in poor network conditions.</li>
+            <li>From <code>v_5.1.x</code>, preset workflows no longer depend on ComfyUI-Tooling-Nodes.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Video Tutorials</h2>
+          <p class="notice">
+            Please watch the following videos in order. Tutorial videos are in Chinese.
+          </p>
+          <ol>
+            <li>ComfyUI2TD_v5.1 New Version Tutorial Must Watch (Bilibili)</li>
+            <li>ComfyUI2TD Basic Tutorial (Bilibili)</li>
+            <li>Cloud Deployment ComfyUI Xiangongyun Tutorial (Bilibili)</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>Cloud Deployment</h2>
+          <p>
+            If you need cloud-based ComfyUI, Xiangongyun servers are available and the matching image is ready.
+          </p>
+          <p>
+            This helps when your ComfyUI runs remotely and TouchDesigner receives streamed data over the network.
+          </p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Installation</h2>
+
+        <h3>Method 1: Manager Installation</h3>
+        <p>Use ComfyUI-Manager to search for <code>ComfyUI-TD</code> and install it directly.</p>
+
+        <h3>Method 2: Manual Installation</h3>
+        <p>
+          Download and unzip this project into:
+          <code>X:\ComfyUI_windows_portable\ComfyUI\custom_nodes</code>
+        </p>
+
+        <h3>Method 3: Git Clone</h3>
+        <pre><code>cd custom_nodes
+git clone https://github.com/JiSenHua/ComfyUI-TD.git</code></pre>
+
+        <h3>Method 4: Injection Installation</h3>
+        <p>
+          Use the <code>InjectFile</code> function together with <code>ComfyUI2TD.tox</code>
+          to inject nodes automatically into:
+          <code>X:\ComfyUI_windows_portable\ComfyUI\custom_nodes</code>
+        </p>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Project Links</h2>
+          <ul class="links-list">
+            <li>
+              Repository:
+              <a href="https://github.com/JiSenHua/ComfyUI-TD">https://github.com/JiSenHua/ComfyUI-TD</a>
+            </li>
+            <li>
+              GitHub Pages:
+              <a href="https://jisenhua.github.io/ComfyUI-TD/">https://jisenhua.github.io/ComfyUI-TD/</a>
+            </li>
+            <li>
+              Chinese README:
+              <a href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">
+                https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Thanks</h2>
+          <p>
+            The legacy <code>ComfyUI2TD.tox</code> component was developed based on the TDComfyUI project.
+            Thanks to olegchomp.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <div data-lang-content="zh">
+      <section class="hero">
+        <div class="card">
+          <h1>将 ComfyUI 生成结果实时传输到 TouchDesigner</h1>
+          <div class="subtitle">
+            一个用于把图像、视频、点云、Gaussian Splatting PLY 和音频从 ComfyUI 实时发送到 TouchDesigner 的自定义节点。
+          </div>
+
+          <p>
+            <strong>ComfyUI-TD</strong> 面向希望将 AI 生成工作流接入实时媒体系统的创作者与开发者。
+          </p>
+          <p>
+            它需要配合 <strong>ComfyUI2TD.tox</strong> 使用，并通过重写后的 WebSocket 接口提供更稳定的数据传输体验。
+          </p>
+
+          <div class="cta-group">
+            <a class="btn primary" href="https://github.com/JiSenHua/ComfyUI-TD">查看 GitHub</a>
+            <a class="btn secondary" href="https://github.com/JiSenHua/ComfyUI-TD#readme">英文 README</a>
+            <a class="btn secondary" href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">中文 README</a>
+          </div>
+
+          <div class="tags">
+            <span class="tag">ComfyUI</span>
+            <span class="tag">TouchDesigner</span>
+            <span class="tag">WebSocket</span>
+            <span class="tag">图像</span>
+            <span class="tag">视频</span>
+            <span class="tag">音频</span>
+            <span class="tag">点云</span>
+            <span class="tag">Gaussian Splatting</span>
+          </div>
+        </div>
+
+        <div class="card hero-preview">
+          <img src="Image/gaussian.gif" alt="Gaussian Splatting 演示" />
+          <div class="hero-preview-note">
+            来自仓库资源的实时效果预览。
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">支持的数据类型</h2>
+        <div class="grid-3">
+          <div class="media-card">
+            <img src="Image/image.gif" alt="图像传输演示" />
+            <div class="media-body">
+              <p class="media-title">图像</p>
+              <p class="media-desc">将 ComfyUI 生成的图像结果实时传输到 TouchDesigner。</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/Video.gif" alt="视频传输演示" />
+            <div class="media-body">
+              <p class="media-title">视频</p>
+              <p class="media-desc">传输视频输出，用于实时播放和视觉系统。</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/audio.gif" alt="音频传输演示" />
+            <div class="media-body">
+              <p class="media-title">音频</p>
+              <p class="media-desc">将生成或处理后的音频数据发送到 TouchDesigner 工作流。</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/PointCloud.gif" alt="点云传输演示" />
+            <div class="media-body">
+              <p class="media-title">点云</p>
+              <p class="media-desc">支持传统点云与 3D 模型数据传输流程。</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/gaussian.gif" alt="Gaussian Splatting 演示" />
+            <div class="media-body">
+              <p class="media-title">Gaussian Splatting PLY</p>
+              <p class="media-desc">支持在 TouchDesigner 流程中使用 Gaussian Splatting PLY 数据。</p>
+            </div>
+          </div>
+
+          <div class="media-card">
+            <img src="Image/logo.png" alt="ComfyUI-TD logo" />
+            <div class="media-body">
+              <p class="media-title">ComfyUI2TD 生态</p>
+              <p class="media-desc">与 ComfyUI2TD.tox 组件配合工作而设计。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>项目简介</h2>
+          <p>
+            ComfyUI-TD 是一个 ComfyUI 到 TouchDesigner 的自定义节点，用于实时传输生成数据。
+          </p>
+          <ul>
+            <li>图像</li>
+            <li>视频</li>
+            <li>音频</li>
+            <li>传统 PLY 点云</li>
+            <li>Gaussian Splatting PLY</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>用户须知</h2>
+          <ul>
+            <li>部分节点基于 ComfyUI-Tooling-Nodes 进行了移植和优化。</li>
+            <li>ComfyUI-TD 必须与 <code>ComfyUI2TD.tox</code> 一起使用。</li>
+            <li>请将 <code>ComfyUI2TD.tox</code> 更新到 <code>v_5.1.x</code> 或更高版本。</li>
+            <li>当前版本进行了完整代码重构，支持视频和 3D 模型数据传输。</li>
+            <li>WebSocket 接口已重写，可改善云端弱网络条件下的数据返回稳定性。</li>
+            <li>从 <code>v_5.1.x</code> 开始，预设工作流不再依赖 ComfyUI-Tooling-Nodes。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>视频教程</h2>
+          <p class="notice">
+            请按顺序观看以下视频，教程为中文。
+          </p>
+          <ol>
+            <li>ComfyUI2TD_v5.1 新版本教程（必看，Bilibili）</li>
+            <li>ComfyUI2TD 基础教程（Bilibili）</li>
+            <li>ComfyUI 云端部署仙宫云教程（Bilibili）</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>云端部署</h2>
+          <p>
+            如果你需要使用云端 ComfyUI，可以选择仙宫云服务器，对应镜像已经准备好。
+          </p>
+          <p>
+            适用于远程运行 ComfyUI 并将生成数据通过网络实时回传到 TouchDesigner 的场景。
+          </p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>安装方式</h2>
+
+        <h3>方式 1：Manager 安装</h3>
+        <p>使用 ComfyUI-Manager 搜索 <code>ComfyUI-TD</code> 并直接安装。</p>
+
+        <h3>方式 2：手动安装</h3>
+        <p>
+          下载并解压本项目到：
+          <code>X:\ComfyUI_windows_portable\ComfyUI\custom_nodes</code>
+        </p>
+
+        <h3>方式 3：Git Clone</h3>
+        <pre><code>cd custom_nodes
+git clone https://github.com/JiSenHua/ComfyUI-TD.git</code></pre>
+
+        <h3>方式 4：注入安装</h3>
+        <p>
+          配合 <code>ComfyUI2TD.tox</code> 组件，使用 <code>InjectFile</code> 功能自动将节点注入到：
+          <code>X:\ComfyUI_windows_portable\ComfyUI\custom_nodes</code>
+        </p>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>项目链接</h2>
+          <ul class="links-list">
+            <li>
+              仓库地址：
+              <a href="https://github.com/JiSenHua/ComfyUI-TD">https://github.com/JiSenHua/ComfyUI-TD</a>
+            </li>
+            <li>
+              GitHub Pages：
+              <a href="https://jisenhua.github.io/ComfyUI-TD/">https://jisenhua.github.io/ComfyUI-TD/</a>
+            </li>
+            <li>
+              中文 README：
+              <a href="https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md">
+                https://github.com/JiSenHua/ComfyUI-TD/blob/main/README_zh.md
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>致谢</h2>
+          <p>
+            旧版 <code>ComfyUI2TD.tox</code> 组件基于 TDComfyUI 项目开发，感谢 olegchomp。
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      © ComfyUI-TD · GitHub Pages
+    </footer>
+  </div>
+
+  <script>
+    const langButtons = document.querySelectorAll('[data-lang-btn]');
+    const langContents = document.querySelectorAll('[data-lang-content]');
+
+    function setLanguage(lang) {
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+      langButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang-btn') === lang);
+      });
+
+      langContents.forEach(section => {
+        section.classList.toggle('active', section.getAttribute('data-lang-content') === lang);
+      });
+
+      localStorage.setItem('comfyui_td_lang', lang);
+    }
+
+    const savedLang = localStorage.getItem('comfyui_td_lang') || 'en';
+    setLanguage(savedLang);
+
+    langButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setLanguage(btn.getAttribute('data-lang-btn'));
+      });
+    });
+  </script>
+</body>
+</html>

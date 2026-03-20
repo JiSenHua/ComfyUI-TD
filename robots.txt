@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jisenhua.github.io/ComfyUI-TD/sitemap.xml
