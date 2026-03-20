@@ -11,7 +11,7 @@ on:
       - "zh/index.html"
       - "robots.txt"
       - "sitemap.xml"
-      - "15324b6e-8612-491a-b3fe-f2d440370ebb.txt"
+      - "comfyui-td-indexnow-key.txt"
 
 jobs:
   submit-indexnow:
@@ -20,8 +20,8 @@ jobs:
     steps:
       - name: Submit site URLs
         env:
-          INDEXNOW_KEY: 15324b6e-8612-491a-b3fe-f2d440370ebb
-          INDEXNOW_KEY_LOCATION: https://jisenhua.github.io/ComfyUI-TD/15324b6e-8612-491a-b3fe-f2d440370ebb.txt
+          INDEXNOW_KEY: comfyui-td-indexnow-key-20260320
+          INDEXNOW_KEY_LOCATION: https://jisenhua.github.io/ComfyUI-TD/comfyui-td-indexnow-key.txt
         run: |
           payload='{
             "host": "jisenhua.github.io",
