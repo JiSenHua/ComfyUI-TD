@@ -1139,3 +1139,126 @@ class StringtoTD:
             }
         except Exception as e:
             raise ValueError(f"Error sending string: {str(e)}")
+
+class ImagetoTD_Tagged:
+    EVENT_TYPE = 1005
+    MAGIC = b"ITD3"
+    VERSION = 1
+
+    FORMAT_MAP = {
+        "png": 1,
+        "jpeg": 2,
+    }
+
+    CONTENT_TYPE_MAP = {
+        "png": "image/png",
+        "jpeg": "image/jpeg",
+    }
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "format": (["png", "jpeg"], {"default": "png"}),
+                "layer_tag": ("STRING", {"default": "depth", "multiline": False}),
+                "quality": ("INT", {"default": 95, "min": 1, "max": 100}),
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "send_images"
+    OUTPUT_NODE = True
+    CATEGORY = "TouchDesigner"
+
+    def send_images(self, images, format, layer_tag, quality):
+        results = []
+
+        if layer_tag is None:
+            layer_tag = ""
+        layer_tag = str(layer_tag)
+
+        for tensor in images:
+            image = self._tensor_to_pil_image(tensor)
+            image_bytes, content_type = self._encode_image(image, format, quality)
+            packet = self._build_packet(format, layer_tag, image_bytes)
+
+            server = PromptServer.instance
+
+            server.send_sync(
+                self.EVENT_TYPE,
+                packet,
+                sid=None,
+            )
+
+            results.append({
+                "source": "websocket",
+                "content-type": content_type,
+                "type": "output",
+                "layer-tag": layer_tag,
+            })
+
+        return {"ui": {"images": results}}
+
+    def _tensor_to_pil_image(self, tensor):
+        array = 255.0 * tensor.cpu().numpy()
+        array = np.clip(array, 0, 255).astype(np.uint8)
+
+        if array.ndim == 2:
+            return Image.fromarray(array, mode="L")
+
+        if array.ndim == 3:
+            if array.shape[2] == 1:
+                return Image.fromarray(array[:, :, 0], mode="L")
+            elif array.shape[2] == 3:
+                return Image.fromarray(array, mode="RGB")
+            elif array.shape[2] == 4:
+                return Image.fromarray(array, mode="RGBA")
+
+        raise ValueError(f"Unsupported image tensor shape: {array.shape}")
+
+    def _encode_image(self, image, format, quality):
+        bytes_io = io.BytesIO()
+
+        if format == "png":
+            image.save(bytes_io, format="PNG")
+            return bytes_io.getvalue(), self.CONTENT_TYPE_MAP["png"]
+
+        elif format == "jpeg":
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+            image.save(bytes_io, format="JPEG", quality=quality)
+            return bytes_io.getvalue(), self.CONTENT_TYPE_MAP["jpeg"]
+
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+
+    def _build_packet(self, format, layer_tag, image_bytes):
+        """
+        4s  magic      = b"ITD3"
+        B   version    = 1
+        B   format     = 1(png) / 2(jpeg)
+        H   tag_len
+        I   image_len
+        ... tag utf-8 bytes
+        ... image bytes
+        """
+        if format not in self.FORMAT_MAP:
+            raise ValueError(f"Unsupported format: {format}")
+
+        tag_bytes = layer_tag.encode("utf-8")
+        fmt_code = self.FORMAT_MAP[format]
+
+        if len(tag_bytes) > 65535:
+            raise ValueError("layer_tag is too long, max 65535 bytes")
+
+        header = struct.pack(
+            ">4sBBHI",
+            self.MAGIC,
+            self.VERSION,
+            fmt_code,
+            len(tag_bytes),
+            len(image_bytes),
+        )
+
+        return header + tag_bytes + image_bytes
