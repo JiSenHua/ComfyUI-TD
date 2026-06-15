@@ -1,24 +1,25 @@
-import struct
-import numpy as np
-import io
-from server import PromptServer, BinaryEventTypes
-from pathlib import Path
-from PIL import Image
 import base64
-from io import BytesIO
-import torch
-import tempfile
+import io
 import os
+import struct
+import tempfile
 
+import numpy as np
+import torch
+from PIL import Image
+from server import BinaryEventTypes, PromptServer
 
 class Hy3DtoTD:
     #https://github.com/kijai/ComfyUI-Hunyuan3DWrapper
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
         return {
             "required": {
-                "trimesh": ("TRIMESH",),
                 "broadcast": ("BOOLEAN", {"default": False}),
+            },
+            "optional": {
+                "trimesh": ("TRIMESH",),
+                "mesh": ("MESH",),
             }
         }
 
@@ -27,14 +28,24 @@ class Hy3DtoTD:
     OUTPUT_NODE = True
     CATEGORY = "TouchDesigner"
 
-    def send_mesh(self, trimesh, broadcast):
+    def send_mesh(self, broadcast, trimesh=None, mesh=None):
         try:
-            processed_mesh = self.process_mesh(trimesh)
-            return self._send_to_td(processed_mesh, broadcast)
+            if trimesh is not None and mesh is not None:
+                raise ValueError("请只连接一个输入：trimesh 或 mesh，不能同时连接。")
+
+            if trimesh is not None:
+                vertices, colors = self.process_trimesh(trimesh)
+            elif mesh is not None:
+                vertices, colors = self.process_comfy_mesh(mesh)
+            else:
+                raise ValueError("请连接一个 trimesh 或 mesh 输入。")
+
+            return self._send_to_td(vertices, colors, broadcast)
+
         except Exception as e:
             raise ValueError(f"Error processing mesh: {str(e)}")
 
-    def process_mesh(self, mesh):
+    def process_trimesh(self, mesh):
         try:
             import trimesh
 
@@ -43,6 +54,7 @@ class Hy3DtoTD:
                 for m in mesh.geometry.values():
                     if isinstance(m, trimesh.Trimesh):
                         meshes.append(m)
+
                 if meshes:
                     mesh = trimesh.util.concatenate(meshes)
                 else:
@@ -53,46 +65,211 @@ class Hy3DtoTD:
 
             mesh.fix_normals()
 
-            if hasattr(mesh.visual, 'vertex_colors') and mesh.visual.vertex_colors is not None:
-                pass
-            elif hasattr(mesh.visual, 'uv') and mesh.visual.uv is not None:
-                mesh.visual = mesh.visual.to_color()
-            else:
-                mesh.visual = trimesh.visual.ColorVisuals(mesh)
-                mesh.visual.vertex_colors = np.tile([200, 200, 200, 255], (len(mesh.vertices), 1))
+            vertices = np.asarray(mesh.vertices, dtype=np.float32)
+            vertex_count = len(vertices)
 
-            return mesh
+            if hasattr(mesh.visual, "vertex_colors") and mesh.visual.vertex_colors is not None:
+                colors = np.asarray(mesh.visual.vertex_colors)
+            elif hasattr(mesh.visual, "uv") and mesh.visual.uv is not None:
+                try:
+                    mesh.visual = mesh.visual.to_color()
+                    colors = np.asarray(mesh.visual.vertex_colors)
+                except Exception:
+                    colors = np.tile([200, 200, 200, 255], (vertex_count, 1))
+            else:
+                colors = np.tile([200, 200, 200, 255], (vertex_count, 1))
+
+            colors = self._normalize_colors(colors, vertex_count)
+
+            return vertices, colors
 
         except ImportError:
             raise ImportError("Please install the trimesh library: pip install trimesh")
         except Exception as e:
-            raise ValueError(f"Error processing mesh: {str(e)}")
+            raise ValueError(f"Error processing trimesh: {str(e)}")
 
-    def _send_to_td(self, mesh, broadcast):
+    def process_comfy_mesh(self, mesh):
         try:
-            import trimesh
+            if isinstance(mesh, list):
+                if len(mesh) == 0:
+                    raise ValueError("Empty mesh list received")
+                mesh = mesh[0]
 
-            buffer = io.BytesIO()
-            mesh.export(file_obj=buffer, file_type='ply')
-            binary_data = buffer.getvalue()
-            buffer.close()
+            vertices = self._extract_comfy_mesh_vertices(mesh)
+            vertex_count = len(vertices)
+
+            colors = self._extract_comfy_mesh_colors(mesh, vertex_count)
+            colors = self._normalize_colors(colors, vertex_count)
+
+            return vertices, colors
+
+        except Exception as e:
+            raise ValueError(f"Error processing ComfyUI mesh: {str(e)}")
+
+    def _extract_comfy_mesh_vertices(self, mesh):
+        vertices = None
+
+        if hasattr(mesh, "vertices") and mesh.vertices is not None:
+            vertices = mesh.vertices
+        elif isinstance(mesh, dict) and "vertices" in mesh:
+            vertices = mesh["vertices"]
+        elif isinstance(mesh, (tuple, list)) and len(mesh) > 0:
+            vertices = mesh[0]
+
+        if vertices is None:
+            raise ValueError("Cannot find vertices in ComfyUI mesh")
+
+        vertices = self._to_numpy(vertices)
+        vertices = self._squeeze_batch(vertices)
+        vertices = np.asarray(vertices, dtype=np.float32)
+
+        if vertices.ndim != 2 or vertices.shape[1] < 3:
+            raise ValueError(f"Invalid vertices shape: {vertices.shape}")
+
+        return vertices[:, :3]
+
+    def _extract_comfy_mesh_colors(self, mesh, vertex_count):
+        colors = None
+
+        if hasattr(mesh, "vertex_colors") and mesh.vertex_colors is not None:
+            colors = mesh.vertex_colors
+        elif hasattr(mesh, "colors") and mesh.colors is not None:
+            colors = mesh.colors
+        elif hasattr(mesh, "visual") and mesh.visual is not None:
+            if hasattr(mesh.visual, "vertex_colors") and mesh.visual.vertex_colors is not None:
+                colors = mesh.visual.vertex_colors
+        elif isinstance(mesh, dict) and "vertex_colors" in mesh:
+            colors = mesh["vertex_colors"]
+        elif isinstance(mesh, dict) and "colors" in mesh:
+            colors = mesh["colors"]
+
+        if colors is None:
+            colors = np.tile([200, 200, 200, 255], (vertex_count, 1))
+
+        return colors
+
+    def _to_numpy(self, value):
+        if value is None:
+            return None
+
+        if hasattr(value, "detach"):
+            value = value.detach()
+        if hasattr(value, "cpu"):
+            value = value.cpu()
+        if hasattr(value, "numpy"):
+            value = value.numpy()
+
+        return np.asarray(value)
+
+    def _squeeze_batch(self, value):
+        value = np.asarray(value)
+
+        if value.ndim == 3 and value.shape[0] == 1:
+            value = value[0]
+
+        return value
+
+    def _normalize_colors(self, colors, vertex_count):
+        colors = self._to_numpy(colors)
+
+        if colors is None:
+            colors = np.tile([200, 200, 200, 255], (vertex_count, 1))
+
+        colors = self._squeeze_batch(colors)
+        colors = np.asarray(colors)
+
+        if colors.ndim == 1:
+            if colors.shape[0] in (3, 4):
+                colors = np.tile(colors, (vertex_count, 1))
+            else:
+                colors = np.column_stack([colors, colors, colors])
+
+        if colors.ndim != 2:
+            colors = np.tile([200, 200, 200, 255], (vertex_count, 1))
+
+        if len(colors) != vertex_count:
+            if len(colors) > vertex_count:
+                colors = colors[:vertex_count]
+            elif len(colors) > 0:
+                last_color = colors[-1]
+                padding = np.tile(last_color, (vertex_count - len(colors), 1))
+                colors = np.vstack([colors, padding])
+            else:
+                colors = np.tile([200, 200, 200, 255], (vertex_count, 1))
+
+        if colors.dtype != np.uint8:
+            if colors.size > 0 and colors.max() <= 1.0:
+                colors = (np.clip(colors, 0, 1) * 255).astype(np.uint8)
+            else:
+                colors = np.clip(colors, 0, 255).astype(np.uint8)
+
+        if colors.shape[1] == 1:
+            colors = np.repeat(colors, 3, axis=1)
+
+        if colors.shape[1] == 2:
+            colors = np.repeat(colors[:, :1], 3, axis=1)
+
+        if colors.shape[1] == 3:
+            alpha = np.full((vertex_count, 1), 255, dtype=np.uint8)
+            colors = np.concatenate([colors, alpha], axis=1)
+
+        if colors.shape[1] > 4:
+            colors = colors[:, :4]
+
+        if colors.shape[1] < 4:
+            default_colors = np.tile([200, 200, 200, 255], (vertex_count, 1)).astype(np.uint8)
+            default_colors[:, :colors.shape[1]] = colors
+            colors = default_colors
+
+        return colors[:, :4].astype(np.uint8)
+
+    def _send_to_td(self, vertices, colors, broadcast):
+        try:
+            vertices = np.asarray(vertices, dtype=np.float32)
+            vertex_count = len(vertices)
+            colors = self._normalize_colors(colors, vertex_count)
+
+            dtype_vertex = np.dtype([
+                ("pos", "<f4", 3),
+                ("color", "u1", 4)
+            ])
+
+            vertex_data = np.empty(vertex_count, dtype=dtype_vertex)
+            vertex_data["pos"] = vertices[:, :3]
+            vertex_data["color"] = colors[:, :4]
+
+            header = (
+                "ply\n"
+                "format binary_little_endian 1.0\n"
+                f"element vertex {vertex_count}\n"
+                "property float x\n"
+                "property float y\n"
+                "property float z\n"
+                "property uchar red\n"
+                "property uchar green\n"
+                "property uchar blue\n"
+                "property uchar alpha\n"
+                "end_header\n"
+            ).encode("ascii")
+
+            binary_data = header + vertex_data.tobytes()
 
             server = PromptServer.instance
             sid = None if broadcast else server.client_id
             server.send_sync(1000, binary_data, sid=sid)
 
-            return {"ui": {
-                "mesh": [{
-                    "source": "websocket",
-                    "content-type": "model/ply",
-                    "type": "output",
-                }]
-            }}
-        except ImportError:
-            raise ImportError("Please install the trimesh library: pip install trimesh")
-        except Exception as e:
-            raise ValueError(f"Error sending mesh to TouchDesigner: {str(e)}")
+            return {
+                "ui": {
+                    "mesh": [{
+                        "source": "websocket",
+                        "content-type": "model/ply",
+                        "type": "output",
+                    }]
+                }
+            }
 
+        except Exception as e:
+            raise ValueError(f"Error sending point PLY to TouchDesigner: {str(e)}")
 
 class Tripo3DtoTD:
     #https://github.com/VAST-AI-Research/ComfyUI-Tripo
@@ -336,11 +513,6 @@ class ImagetoTD_JPEG:
     CATEGORY = "TouchDesigner"
 
     def send_images(self, images, broadcast, quality):
-        import numpy as np
-        from PIL import Image
-        import io
-        import struct
-
         results = []
         for tensor in images:
             array = 255.0 * tensor.cpu().numpy()
@@ -719,7 +891,7 @@ class LoadTDImage:
     def load_image(self, image):
         try:
             imgdata = base64.b64decode(image)
-            img = Image.open(BytesIO(imgdata))
+            img = Image.open(io.BytesIO(imgdata))
 
             width, height = img.size
 
