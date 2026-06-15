@@ -31,19 +31,20 @@ class Hy3DtoTD:
     def send_mesh(self, broadcast, trimesh=None, mesh=None):
         try:
             if trimesh is not None and mesh is not None:
-                raise ValueError("请只连接一个输入：trimesh 或 mesh，不能同时连接。")
+                raise ValueError("Please connect only one input: trimesh or mesh, not both.")
 
             if trimesh is not None:
                 vertices, colors = self.process_trimesh(trimesh)
             elif mesh is not None:
                 vertices, colors = self.process_comfy_mesh(mesh)
             else:
-                raise ValueError("请连接一个 trimesh 或 mesh 输入。")
+                raise ValueError("Please connect either a trimesh or mesh input.")
 
             return self._send_to_td(vertices, colors, broadcast)
 
         except Exception as e:
             raise ValueError(f"Error processing mesh: {str(e)}")
+
 
     def process_trimesh(self, mesh):
         try:
@@ -1131,14 +1132,24 @@ class AudiotoTD:
                 "type": "output",
             }]
         }}
-
 class GaussianSplattingtoTD:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": {
-                "ply_path": ("STRING",),
-                "broadcast": ("BOOLEAN", {"default": False}),
+            "required": {},
+            "optional": {
+                "splat": ("SPLAT", {
+                    "tooltip": "Optional input source. Choose either this SPLAT input or ply_path. If both are provided, SPLAT will be used and ply_path will be ignored."
+                }),
+                "ply_path": ("STRING", {
+                    "forceInput": True,
+                    "default": "",
+                    "tooltip": "Optional input source. Choose either a PLY file path or the SPLAT input. If both are provided, SPLAT will be used and ply_path will be ignored."
+                }),
+                "broadcast": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Send to all connected ComfyUI frontend clients. If disabled, the data is sent only to the current client."
+                }),
             }
         }
 
@@ -1147,17 +1158,115 @@ class GaussianSplattingtoTD:
     OUTPUT_NODE = True
     CATEGORY = "TouchDesigner"
 
-    def send_gaussian_splatting(self, ply_path, broadcast):
+    def send_gaussian_splatting(self, splat=None, ply_path="", broadcast=False):
         try:
-            gs_data = self.process_ply(ply_path)
+            has_splat = splat is not None
+            has_ply = bool(ply_path and ply_path.strip())
+
+            if has_splat and has_ply:
+                print(
+                    "[GaussianSplattingtoTD] Both SPLAT and ply_path were provided. "
+                    "Using SPLAT input and ignoring ply_path."
+                )
+
+            if has_splat:
+                gs_data = self.process_splat(splat)
+            elif has_ply:
+                gs_data = self.process_ply(ply_path)
+            else:
+                raise ValueError(
+                    "No input source provided. Please connect a SPLAT input or provide a ply_path. "
+                    "Choose one of them."
+                )
+
             return self._send_to_td(gs_data, broadcast)
+
         except Exception as e:
             raise ValueError(f"Error processing Gaussian Splatting data: {str(e)}")
 
+    def process_splat(self, splat):
+        def t2n(x):
+            if x is None:
+                return None
+            if isinstance(x, torch.Tensor):
+                return x.detach().cpu().float().numpy()
+            return np.asarray(x, dtype=np.float32)
+
+        positions = t2n(getattr(splat, 'positions'))
+        scales    = t2n(getattr(splat, 'scales'))
+        rotations = t2n(getattr(splat, 'rotations'))
+        opacities = t2n(getattr(splat, 'opacities'))
+        sh        = t2n(getattr(splat, 'sh'))
+
+        counts = getattr(splat, 'counts', None)
+        if counts is not None:
+            counts = t2n(counts)
+
+        if positions is None:
+            raise ValueError("SPLAT is missing required field: positions")
+        if scales is None:
+            raise ValueError("SPLAT is missing required field: scales")
+        if rotations is None:
+            raise ValueError("SPLAT is missing required field: rotations")
+        if opacities is None:
+            raise ValueError("SPLAT is missing required field: opacities")
+        if sh is None:
+            raise ValueError("SPLAT is missing required field: sh")
+
+        # Validate batched dimensions
+        if positions.ndim != 3:
+            raise ValueError(f"Expected positions shape (B, N, 3), got {positions.shape}")
+        if scales.ndim != 3:
+            raise ValueError(f"Expected scales shape (B, N, 3), got {scales.shape}")
+        if rotations.ndim != 3:
+            raise ValueError(f"Expected rotations shape (B, N, 4), got {rotations.shape}")
+        if opacities.ndim != 3:
+            raise ValueError(f"Expected opacities shape (B, N, 1), got {opacities.shape}")
+        if sh.ndim != 4:
+            raise ValueError(f"Expected sh shape (B, N, K, 3), got {sh.shape}")
+
+        positions = positions[0]      # (N, 3)
+        scales    = scales[0]         # (N, 3)
+        rotations = rotations[0]      # (N, 4)
+        opacities = opacities[0]      # (N, 1)
+        sh        = sh[0]             # (N, K, 3)
+
+        # Use counts[0] to remove padded points if available
+        if counts is not None:
+            n_real = int(counts[0])
+            positions = positions[:n_real]
+            scales    = scales[:n_real]
+            rotations = rotations[:n_real]
+            opacities = opacities[:n_real]
+            sh        = sh[:n_real]
+
+        f_dc = sh[:, 0, :].astype(np.float32)
+
+        # Convert activated SPLAT values back to standard 3DGS PLY parameter space:
+        eps = 1e-6
+
+        op = np.clip(opacities.reshape(-1), eps, 1.0 - eps).astype(np.float32)
+        opacity_logit = np.log(op / (1.0 - op))  # inverse sigmoid
+
+        sc = np.clip(scales, eps, None).astype(np.float32)
+        scale_log = np.log(sc)                   # inverse exp
+
+        gs_data = {
+            'positions': positions.astype(np.float32),
+            'colors':    f_dc,
+            'opacity':   opacity_logit,
+            'scales':    scale_log,
+            'rotations': rotations.astype(np.float32),
+        }
+
+        return gs_data
+
     def process_ply(self, ply_path):
         try:
+            import os
+            import numpy as np
             from plyfile import PlyData
-            
+
             if not ply_path.startswith(('http://', 'https://')) and not os.path.isabs(ply_path):
                 try:
                     import folder_paths
@@ -1165,33 +1274,60 @@ class GaussianSplattingtoTD:
                     local_path = os.path.join(output_dir, ply_path)
                     if os.path.exists(local_path):
                         ply_path = local_path
-                except:
+                except Exception:
                     pass
-            
+
             if not os.path.exists(ply_path):
                 raise ValueError(f"PLY file not found: {ply_path}")
-            
+
             plydata = PlyData.read(ply_path)
             vertex = plydata['vertex']
-            
-            required_props = ['x', 'y', 'z', 'f_dc_0', 'f_dc_1', 'f_dc_2', 
-                            'opacity', 'scale_0', 'scale_1', 'scale_2', 
-                            'rot_0', 'rot_1', 'rot_2', 'rot_3']
-            
-            missing_props = [prop for prop in required_props if prop not in vertex.data.dtype.names]
+
+            required_props = [
+                'x', 'y', 'z',
+                'f_dc_0', 'f_dc_1', 'f_dc_2',
+                'opacity',
+                'scale_0', 'scale_1', 'scale_2',
+                'rot_0', 'rot_1', 'rot_2', 'rot_3'
+            ]
+
+            missing_props = [
+                prop for prop in required_props
+                if prop not in vertex.data.dtype.names
+            ]
+
             if missing_props:
                 raise ValueError(f"Missing properties in PLY file: {missing_props}")
-            
-            gs_data = {
-                'positions': np.stack([vertex['x'], vertex['y'], vertex['z']], axis=1).astype(np.float32),
-                'colors': np.stack([vertex['f_dc_0'], vertex['f_dc_1'], vertex['f_dc_2']], axis=1).astype(np.float32),
+
+            return {
+                'positions': np.stack([
+                    vertex['x'],
+                    vertex['y'],
+                    vertex['z']
+                ], axis=1).astype(np.float32),
+
+                'colors': np.stack([
+                    vertex['f_dc_0'],
+                    vertex['f_dc_1'],
+                    vertex['f_dc_2']
+                ], axis=1).astype(np.float32),
+
                 'opacity': vertex['opacity'].astype(np.float32),
-                'scales': np.stack([vertex['scale_0'], vertex['scale_1'], vertex['scale_2']], axis=1).astype(np.float32),
-                'rotations': np.stack([vertex['rot_0'], vertex['rot_1'], vertex['rot_2'], vertex['rot_3']], axis=1).astype(np.float32),
+
+                'scales': np.stack([
+                    vertex['scale_0'],
+                    vertex['scale_1'],
+                    vertex['scale_2']
+                ], axis=1).astype(np.float32),
+
+                'rotations': np.stack([
+                    vertex['rot_0'],
+                    vertex['rot_1'],
+                    vertex['rot_2'],
+                    vertex['rot_3']
+                ], axis=1).astype(np.float32),
             }
-            
-            return gs_data
-            
+
         except ImportError:
             raise ImportError("Please install the plyfile library: pip install plyfile")
         except Exception as e:
@@ -1199,74 +1335,61 @@ class GaussianSplattingtoTD:
 
     def _send_to_td(self, gs_data, broadcast):
         try:
+            import numpy as np
+            from server import PromptServer
+
             num_points = len(gs_data['positions'])
-            
-            header = [
-                "ply",
-                "format binary_little_endian 1.0",
-                f"element vertex {num_points}",
-                "property float x",
-                "property float y",
-                "property float z",
-                "property float f_dc_0",
-                "property float f_dc_1",
-                "property float f_dc_2",
-                "property float opacity",
-                "property float scale_0",
-                "property float scale_1",
-                "property float scale_2",
-                "property float rot_0",
-                "property float rot_1",
-                "property float rot_2",
-                "property float rot_3",
+
+            header = (
+                "ply\n"
+                "format binary_little_endian 1.0\n"
+                f"element vertex {num_points}\n"
+                "property float x\n"
+                "property float y\n"
+                "property float z\n"
+                "property float f_dc_0\n"
+                "property float f_dc_1\n"
+                "property float f_dc_2\n"
+                "property float opacity\n"
+                "property float scale_0\n"
+                "property float scale_1\n"
+                "property float scale_2\n"
+                "property float rot_0\n"
+                "property float rot_1\n"
+                "property float rot_2\n"
+                "property float rot_3\n"
                 "end_header\n"
-            ]
-            header = '\n'.join(header).encode('ascii')
-            
-            binary_data = bytearray()
-            for i in range(num_points):
-                binary_data.extend(struct.pack('<fff', 
-                    gs_data['positions'][i, 0], 
-                    gs_data['positions'][i, 1], 
-                    gs_data['positions'][i, 2]))
-                
-                binary_data.extend(struct.pack('<fff', 
-                    gs_data['colors'][i, 0], 
-                    gs_data['colors'][i, 1], 
-                    gs_data['colors'][i, 2]))
-                
-                binary_data.extend(struct.pack('<f', gs_data['opacity'][i]))
-                
-                binary_data.extend(struct.pack('<fff', 
-                    gs_data['scales'][i, 0], 
-                    gs_data['scales'][i, 1], 
-                    gs_data['scales'][i, 2]))
-                
-                binary_data.extend(struct.pack('<ffff', 
-                    gs_data['rotations'][i, 0], 
-                    gs_data['rotations'][i, 1], 
-                    gs_data['rotations'][i, 2], 
-                    gs_data['rotations'][i, 3]))
-            
-            buffer = io.BytesIO()
-            buffer.write(header)
-            buffer.write(binary_data)
-            binary_output = buffer.getvalue()
-            buffer.close()
-            
+            ).encode('ascii')
+
+            # Vectorized packing:
+            # 14 float32 values per point:
+            # xyz + f_dc_rgb + opacity + scale_xyz + rotation_wxyz
+            interleaved = np.concatenate([
+                gs_data['positions'],                 # 3
+                gs_data['colors'],                    # 3
+                gs_data['opacity'].reshape(-1, 1),    # 1
+                gs_data['scales'],                    # 3
+                gs_data['rotations'],                 # 4
+            ], axis=1).astype('<f4')
+
+            binary_output = header + interleaved.tobytes()
+
             server = PromptServer.instance
             sid = None if broadcast else server.client_id
+
             server.send_sync(1003, binary_output, sid=sid)
-            
-            return {"ui": {
-                "gaussian_splatting": [{
-                    "source": "websocket",
-                    "content-type": "model/ply",
-                    "type": "output",
-                    "point_count": num_points,
-                }]
-            }}
-            
+
+            return {
+                "ui": {
+                    "gaussian_splatting": [{
+                        "source": "websocket",
+                        "content-type": "model/ply",
+                        "type": "output",
+                        "point_count": num_points,
+                    }]
+                }
+            }
+
         except Exception as e:
             raise ValueError(f"Error sending Gaussian Splatting data: {str(e)}")
 
