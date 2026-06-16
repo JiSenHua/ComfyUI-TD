@@ -1139,12 +1139,12 @@ class GaussianSplattingtoTD:
             "required": {},
             "optional": {
                 "splat": ("SPLAT", {
-                    "tooltip": "Optional input source. Choose either this SPLAT input or ply_path. If both are provided, SPLAT will be used and ply_path will be ignored."
+                    "tooltip": "Optional input source. Choose either this SPLAT input or ply_path. If both are provided."
                 }),
                 "ply_path": ("STRING", {
                     "forceInput": True,
                     "default": "",
-                    "tooltip": "Optional input source. Choose either a PLY file path or the SPLAT input. If both are provided, SPLAT will be used and ply_path will be ignored."
+                    "tooltip": "Optional input source. Choose either a PLY file path or the SPLAT input. If both are provided,."
                 }),
                 "broadcast": ("BOOLEAN", {
                     "default": False,
