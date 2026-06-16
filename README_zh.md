@@ -4,14 +4,13 @@
 
 支持将 ComfyUI 生成的 **图像**、**视频**、**点云（传统 PLY / 高斯泼溅 PLY）**、**音频** 实时传输进 TD。
 
-- 英文主页：https://jisenhua.github.io/ComfyUI-TD/
-- 中文主页：https://jisenhua.github.io/ComfyUI-TD/zh/
+- 
 - GitHub 仓库：https://github.com/JiSenHua/ComfyUI-TD
 
-| ![](Image/image.gif)      | ![](Image/Video.gif)                      |
-|:-------------------------:|:-----------------------------------------:|
-| ![](Image/PointCloud.gif) | ![gaussian.gif](Image/gaussian.gif)       |
-| ![](Image/audio.gif)      | ![logo.png](Image/logo.png) |
+| ![](Image/image.gif)      | ![](Image/Video.gif)                |
+|:-------------------------:|:-----------------------------------:|
+| ![](Image/PointCloud.gif) | ![gaussian.gif](Image/gaussian.gif) |
+| ![](Image/audio.gif)      | ![logo.png](Image/logo.png)         |
 
 - **ComfyUI-TD** 的部分节点基于 [ComfyUI-Tooling-Nodes](https://github.com/Acly/comfyui-tooling-nodes/tree/main) 进行了移植和优化。
 - **ComfyUI-TD** 需与 **ComfyUI2TD.tox** 组件配合使用（插件已上传至 `tox` 文件夹）。
